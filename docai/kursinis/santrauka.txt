@@ -1,0 +1,16 @@
+Darbe nagrinėjamos likvidacijos procesų optimizavimo galimybės perviršinio užstato skolinimo protokoluose. Tyrimo tikslas analizuoti likvidavimo strategijas, siūlomos algoritminės modifikacijos, siekiant maksimaliai padidinti likvidatoriaus pelną.
+
+Pateikiama egzistuojančių metodų apžvalga ir išsamiai analizuojamas "Optimal Fixed Spread Liquidation Strategy" algoritmas. Siūloma jo modifikacija – "pilno išeikvojimo" strategija, kuri efektyviau optimizuoja procesą, leidžiantį pilnai išnaudoti likvidacijos galimybę, neprarandant potencialaus pelno.
+
+Empiriniai duomenys iš Venus protokolo rodo, kad dauguma likvidacijų nepasiekia maksimaliai galimo pelno. Palyginus tris strategijas ("atkartoti", "iki uždarymo ribos", "pilnas išeikvojimas"), nustatyta, kad "pilno išeikvojimo" strategija generuoja iki 72% daugiau pelno nei istorinės likvidacijos. Tai rodo, kad optimizuotos strategijos galėtų reikšmingai padidinti likvidatorių pelningumą.
+
+Šio darbo rezultatai prisideda prie skolinimo protokolų optimizavimo ekosistemos ir atveria kelią tolimesnėms analizėms, susijusioms su valiutų porų ir užstato valdymo strategijomis. Darbo tęstinumas - gilintis į tarpvalutinius keitimus ir kitas likvidacijų galimybes, didinant arbitražo algoritmų efektyvumą.
+
+Ang
+The study examines ways to optimize liquidation processes in over-collateralized lending protocols. The research focuses on analyzing liquidation strategies and propose algorithmic modifications to maximize the liquidator’s profit.
+
+A review of the existing methods includes a detailed analysis of the “Optimal Fixed Spread Liquidation Strategy” algorithm. A proposed modification, called "the drain" strategy, optimizes the process, enabling full utilization of the liquidation opportunity without losing its potential profit.
+
+Empirical evidence from the Venus protocol shows that most liquidations do not achieve the maximum possible profit. A comparison of three strategies (“repeat,” “up to close factor,” and “drain”) shows that "the drain" strategy generate up to 72% more profit than historical liquidations. This demonstrates that when optimized strategies can significantly increase liquidators’ profitability.
+
+The findings of this study contribute to the ecosystem of lending protocol optimization and pave the way for further analyses related to currency pair and collateral management strategies. Future research could explore using different currencies and other liquidation opportunities to enhance the efficiency of arbitrage algorithms.

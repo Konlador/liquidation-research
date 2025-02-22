@@ -1,0 +1,11 @@
+#!/bin/bash
+
+export TX_HASH=0x276ac6afeeca3163e497b0f9fd2c8cad629910e7257c7f498a74d3ab4622dff2
+export REPAY_V_TOKEN=0x882c173bc7ff3b7786ca16dfed3dfffb9ee7847b
+export BORROWER=0xef044206db68e40520bfa82d45419d498b4bc7bf
+export REPAY_AMOUNT=100000000000000000
+export COLLATERAL_V_TOKEN=0x151b1e2635a717bcdc836ecd6fbb62b674fe3e1d
+export EXPECTED_SEIZE=288793093302
+
+clear
+forge test --match-test testLiquidations -vv --no-rpc-rate-limit

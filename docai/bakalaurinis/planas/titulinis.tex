@@ -1,0 +1,59 @@
+\begin{titlepage}
+\vskip 20pt
+\begin{center}
+\includegraphics[scale=0.55]{images/MIF.png}
+\end{center}
+
+\makeatletter
+
+\vskip 20pt
+\centerline{\bf \large \textbf{VILNIAUS UNIVERSITETAS}}
+\vskip 10pt
+\centerline{\large \textbf{MATEMATIKOS IR INFORMATIKOS FAKULTETAS}}
+\vskip 10pt
+\centerline{\large \textbf{\MakeUppercase{\@studijuprograma \space studijų programa}}}
+
+\vskip 80pt
+\centerline{\Large \@darbotipas}
+\vskip 20pt
+\begin{center}
+    {\bf \LARGE \@darbopavadinimas}
+\end{center}
+\begin{center}
+    {\bf \Large \@darbopavadinimasantras}
+\end{center}
+\vskip 80pt
+
+\centering{\Large \@autorius}
+\@ifundefined{@antrasautorius}{}
+{
+\vskip 10pt
+\centering{\Large \@antrasautorius}
+}
+\vskip 20pt
+
+\centering{
+    \begin{tabular}{rcp{.7\textwidth}}
+        {\Large Darbo vadovas} & {\Large :} & {\Large \@vadovas}\\[10pt]
+        \@ifundefined{@moksliniskonsultantas}{}
+            {
+                {\Large Mokslinis konsultantas} & {\Large :} & {\Large \@moksliniskonsultantas}\\[10pt]
+            }
+        \@ifundefined{@recenzentas}{}
+            {
+                {\Large Recenzentas} & {\Large :} & {\Large \@recenzentas}\\[10pt]
+            }
+    \end{tabular}}
+
+
+\vskip 110pt
+
+\centerline{\large \textbf{Vilnius}}
+\centerline{\large \textbf{\the\year{}}}
+
+\makeatother
+
+\newpage
+\end{titlepage}
+%\newgeometry{top=2cm,bottom=2cm,right=2cm,left=3cm}
+\setcounter{page}{2}
