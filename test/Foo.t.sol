@@ -7,6 +7,7 @@ import "forge-std/src/Test.sol";
 import { console } from "forge-std/src/console.sol";
 
 import { ComptrollerInterface } from "../src/Comptroller/ComptrollerInterface.sol";
+import { VAIControllerInterface } from "../src/Tokens/VAI/VAIControllerInterface.sol";
 import { VBep20Interface, VTokenInterface } from "../src/Tokens/VTokens/VTokenInterfaces.sol";
 import { EIP20Interface } from "../src/Tokens/EIP20Interface.sol";
 import { ComptrollerErrorReporter } from "../src/Utils/ErrorReporter.sol";
@@ -92,11 +93,12 @@ contract LiquidationTest is Test, ExponentialNoError {
         drainSameToken(borrower);
         vm.revertTo(freshSnapshotId);
 
-        // // #5 From smallest collateral factor
-        // fromSmallestCollateralFactor(borrower);
-        // vm.revertTo(freshSnapshotId);
+        // #6 From largest collateral factor
+        // This should work better than smallest
+        fromLargestCollateralFactor(borrower);
+        vm.revertTo(freshSnapshotId);
 
-        // // #6 From largest collateral factor
+        // // #7 From smallest collateral factor
         // fromLargestCollateralFactor(borrower);
         // vm.revertTo(freshSnapshotId);
     }
@@ -112,6 +114,7 @@ contract LiquidationTest is Test, ExponentialNoError {
     {
         console.log("");
         console.log("Tests case: repeatLiquidation");
+        logHealthFactor(borrower, repayVToken, collateralVToken);
 
         bool isRepayChainCoin = dealUnderlyingTokens(repayVToken, repayAmount + 1);
         maybeApproveRepayTokenAndLog(isRepayChainCoin, repayVToken, repayAmount);
@@ -122,6 +125,7 @@ contract LiquidationTest is Test, ExponentialNoError {
 
         console.log("collateralVTokenGained", collateralVTokenGained);
         console.log("gasUsedForLiquidation", gasUsed);
+        logHealthFactor(borrower, repayVToken, collateralVToken);
         assertEq(collateralVTokenGained, expectedSeize, "expected seize does not match");
 
         redeemCollateral(collateralVToken, collateralVTokenGained);
@@ -152,6 +156,8 @@ contract LiquidationTest is Test, ExponentialNoError {
     )
         private
     {
+        logHealthFactor(borrower, repayVToken, collateralVToken);
+
         // Todo: repay amount pamazinti pagal tai kiek yra cash, manau galim i bendra funkcija perkelti sia logika
         (uint256 repayAmount, bool cappedByCollateral) = findMaxRepayAmount(repayVToken, collateralVToken, borrower);
         console.log("maxRepayAmount", repayAmount);
@@ -175,6 +181,7 @@ contract LiquidationTest is Test, ExponentialNoError {
 
         console.log("collateralVTokenGained", collateralVTokenGained);
         console.log("gasUsedForLiquidation", gasUsed);
+        logHealthFactor(borrower, repayVToken, collateralVToken);
         assertGe(
             collateralVTokenGained,
             originalSeizeAmount,
@@ -212,6 +219,7 @@ contract LiquidationTest is Test, ExponentialNoError {
         uint256 repayAmountTotal = 0;
         uint256 liquidationCount = 1;
         while (true) {
+            // TODO: after every liquidation make sure it's worth it for the gas spent
             (uint256 maxRepayAmount, bool cappedByCollateral) =
                 findMaxRepayAmount(repayVToken, collateralVToken, borrower);
             if (maxRepayAmount <= 1 || cappedByCollateral) break;
@@ -219,15 +227,13 @@ contract LiquidationTest is Test, ExponentialNoError {
             uint256 repayAmountThatKeepsBorrowerLiquidatable = findRepayAmountThatKeepsBorrowerLiquidatable(
                 repayVToken, borrower, collateralVToken, isRepayChainCoin, maxRepayAmount
             );
-            // console.log("repayAmountThatKeepsBorrowerLiquidatable", repayAmountThatKeepsBorrowerLiquidatable);
 
             uint256 repayAmount = findSmallestEffectiveRepayAmount(
                 repayVToken, collateralVToken, repayAmountThatKeepsBorrowerLiquidatable, borrower
             );
-            if (repayAmount == 0) {
-                break;
-            }
+            if (repayAmount == 0) break;
 
+            logHealthFactor(borrower, repayVToken, collateralVToken);
             console.log(liquidationCount, "repayAmount", repayAmount);
             repayAmountTotal += repayAmount;
             (uint256 collateralVTokenGained, uint256 gasUsed) =
@@ -239,10 +245,32 @@ contract LiquidationTest is Test, ExponentialNoError {
                 // Should never happen after findSmallestEffectiveRepayAmount was implemented
                 revert("collateral gained cannot be zero");
             }
-            if (repayAmountThatKeepsBorrowerLiquidatable < maxRepayAmount) {
-                break;
-            }
+            if (repayAmountThatKeepsBorrowerLiquidatable < maxRepayAmount) break;
         }
+
+        // (Maybe) last liquidation
+        (uint256 repayAmount, bool cappedByCollateral) = findMaxRepayAmount(repayVToken, collateralVToken, borrower);
+        repayAmount = findSmallestEffectiveRepayAmount(repayVToken, collateralVToken, repayAmount, borrower);
+        if (repayAmount > 0) {
+            // console.log("Last liquidation needed", true);
+            logHealthFactor(borrower, repayVToken, collateralVToken);
+            console.log(liquidationCount, "repayAmount", repayAmount);
+            repayAmountTotal += repayAmount;
+            (uint256 collateralVTokenGained, uint256 gasUsed) =
+                callLiquidate(repayVToken, borrower, repayAmount, collateralVToken, isRepayChainCoin);
+            console.log(liquidationCount, "collateralVTokenGained", collateralVTokenGained);
+            console.log(liquidationCount, "gasUsedForLiquidation", gasUsed);
+        }
+
+        console.log("cappedByCollateral", cappedByCollateral);
+
+        console.log("repayAmountTotal", repayAmountTotal);
+        uint256 collateralVTokenGainedTotal = collateralVToken.balanceOf(myAddress);
+        console.log("collateralVTokenGainedTotal", collateralVTokenGainedTotal);
+        logHealthFactor(borrower, repayVToken, collateralVToken);
+
+        redeemCollateral(collateralVToken, collateralVTokenGainedTotal);
+        logOraclePrices(repayVToken, collateralVToken);
     }
 
     struct AssetData {
@@ -273,98 +301,6 @@ contract LiquidationTest is Test, ExponentialNoError {
         upToCloseFactorLiquidationInternal(borrower, repayVToken, collateralVToken, 0);
 
         console.log("Tests case end");
-
-        // ok tai dabar issiaiskinam didziausia repay amount kur dar kazka gaunam
-        // ir exeucintam
-
-        // patikrinam ar largestBorrow valiutos uztenka uzstato
-        // borrow bus tas kurio dollar value yra didziausias, tai jau radom
-
-        // jeigu taip gaunasi, ai nu tai nedarysim begalybe grazinamu vis mazindavmi return amount dvigubai
-
-        // now find the max possible
-
-        // pasirasom lestuka kuris patikrina kiekviena cap
-
-        // L_max = (borrow token, collateral token, amount returned) - su uztektinu cash
-        // Limit_cash = cash / collateralPrice * borrowPrice /* 1.05 (write a test for it)
-        // L_max'e collateral ir borrow tokenai yra maksimaliai dideli.
-        // likvidacija nedaro itakos exchange rate'ui, nes viska ka grazini prisideda prie cash.
-
-        // Ieskome didziausio L_interim, kad butu galima likviduoti po to bent L_max.amountValue - L_interim.amountValue
-        // Jeigu nebus galima, tai nera prasmes ji daryti ir darome paskutini.
-
-        // Ok tai imam collateral tokena su maziausiu collateral factor
-        // Tada pasirenkam maziausia skola, bandome likviduoti maksimaliai tiek
-        // Kad po lividacijos bus galima likviduoti L_max - L_interim ir be to atsiimti visa cash kuris planuotas
-        // atsiimti
-
-        // Redeems padarysim paciame gale, kad taupyti gas ir bundle'inti
-
-        // uint256 borrowBalance = findBorrowBalance(repayVToken, borrower);
-        // bool isRepayChainCoin = dealUnderlyingTokens(repayVToken, borrowBalance + 1);
-        // maybeApproveRepayTokenAndLog(isRepayChainCoin, repayVToken, borrowBalance);
-
-        // uint256 repayAmountTotal = 0;
-        // uint256 liquidationCount = 1;
-        // while (true) {
-        //     (uint256 maxRepayAmount, bool cappedByCollateral) =
-        //         findMaxRepayAmount(repayVToken, collateralVToken, borrower);
-        //     if (maxRepayAmount <= 1 || cappedByCollateral) break;
-
-        //     uint256 repayAmountThatKeepsBorrowerLiquidatable = findRepayAmountThatKeepsBorrowerLiquidatable(
-        //         repayVToken, borrower, collateralVToken, isRepayChainCoin, maxRepayAmount
-        //     );
-        //     // console.log("repayAmountThatKeepsBorrowerLiquidatable", repayAmountThatKeepsBorrowerLiquidatable);
-
-        //     uint256 repayAmount =
-        //         findSmallestEffectiveRepayAmount(repayVToken, collateralVToken,
-        // repayAmountThatKeepsBorrowerLiquidatable, borrower);
-        //     if (repayAmount == 0) {
-        //         break;
-        //     }
-
-        //     console.log(liquidationCount, "repayAmount", repayAmount);
-        //     repayAmountTotal += repayAmount;
-        //     (uint256 collateralVTokenGained, uint256 gasUsed) =
-        //         callLiquidate(repayVToken, borrower, repayAmount, collateralVToken, isRepayChainCoin);
-        //     console.log(liquidationCount, "collateralVTokenGained", collateralVTokenGained);
-        //     console.log(liquidationCount, "gasUsedForLiquidation", gasUsed);
-        //     liquidationCount++;
-        //     if (collateralVTokenGained == 0) {
-        //         // Should never happen after findSmallestEffectiveRepayAmount was implemented
-        //         revert("collateral gained cannot be zero");
-        //     }
-        //     if (repayAmountThatKeepsBorrowerLiquidatable < maxRepayAmount) {
-        //         break;
-        //     }
-        // }
-
-        // // console.log(liquidationCount, "borrowersCollateralBalance", collateralVToken.balanceOf(borrower));
-
-        // // Last liquidation
-        // (uint256 repayAmount, bool cappedByCollateral) = findMaxRepayAmount(repayVToken, collateralVToken, borrower);
-
-        // repayAmount = findSmallestEffectiveRepayAmount(repayVToken, collateralVToken, repayAmount, borrower);
-        // console.log("Last liquidation needed", repayAmount > 0);
-        // if (repayAmount > 0) {
-        //     console.log(liquidationCount, "repayAmount", repayAmount);
-        //     repayAmountTotal += repayAmount;
-        //     (uint256 collateralVTokenGained, uint256 gasUsed) =
-        //         callLiquidate(repayVToken, borrower, repayAmount, collateralVToken, isRepayChainCoin);
-        //     console.log(liquidationCount, "collateralVTokenGained", collateralVTokenGained);
-        //     console.log(liquidationCount, "gasUsedForLiquidation", gasUsed);
-        // }
-
-        // console.log("cappedByCollateral", cappedByCollateral);
-
-        // console.log("repayAmountTotal", repayAmountTotal);
-        // uint256 collateralVTokenGainedTotal = collateralVToken.balanceOf(myAddress);
-        // console.log("collateralVTokenGainedTotal", collateralVTokenGainedTotal);
-        // assertGe(collateralVTokenGainedTotal, originalSeizeAmount);
-
-        // redeemCollateral(collateralVToken, collateralVTokenGainedTotal);
-        // logOraclePrices(repayVToken, collateralVToken);
     }
 
     function drainSameToken(address borrower) private {
@@ -378,12 +314,209 @@ contract LiquidationTest is Test, ExponentialNoError {
             VTokenInterface repayVToken = assets[i].vtoken;
             console.log("repayVToken", address(repayVToken));
             drainLiquidationInternal(borrower, repayVToken, repayVToken);
+            console.log("sameToken case end");
         }
 
         if (assets.length == 0) {
             console.log("there are no tokens that are both borrowed and staked");
         }
         console.log("Tests case end");
+    }
+
+    struct LiquidationInfo {
+        // Fix
+        AssetData repayAsset;
+        AssetData collateralAsset;
+        uint256 collateralFactor;
+        uint256 collateralAmount;
+        uint256 borrowAmount;
+        uint256 cash;
+        uint256 exchangeRate;
+        uint256 price;
+    }
+
+    function fromLargestCollateralFactor(address borrower) private {
+        console.log("");
+        console.log("Tests case: fromLargestCollateralFactor");
+
+        AssetData[] memory assets = getAssets(borrower);
+        logAssets(assets);
+
+        // At every iteration find the L_max
+        (AssetData memory repayAsset, AssetData memory collateralAsset) = pickRepayAndCollateralAssets(assets);
+        VTokenInterface repayVToken = repayAsset.vtoken;
+        VTokenInterface collateralVToken = collateralAsset.vtoken;
+        console.log("repayVToken", address(repayVToken));
+        console.log("collateralVToken", address(collateralVToken));
+        // Suzinome koks yra collateral_value
+
+        // Dabar parenkam L_i su:
+        // collateral - didziausias collateral factor. Jeigu yra vienodi tai ta kurio collateral yra daugiau
+        // borrow - didziausia skola
+
+        // jeigu sutampa su max ka daryti?
+        // galetu praversti pirma sulikviduoti non max tokenus
+
+        // repay amount parenkam toki, kad L_max_po_i.collateral_value - L_i.collateral_value
+        // butu > L_max.collateral_value
+
+        // Skolos tokena parinkti ta su didziausia skola
+        // jeigu L_max yra ribojamas collateral tai galime pervirsi skolos
+        // paskirti L_i ieskojimui be jokios itakos L_maxui
+
+        // lygiai taip pat su collateral tokenu - jeigu L_max yra ribojamas skolos tai
+        // pervirsinis uzstast gali buti skirtas L_i ieskojimui
+
+        // tai dabar reikia iskoti tokiu L_i, kuriu profit padengtu execution gas
+        // ir tokius, kad imame tas collateral tokenus, kuriu liquidation threashold maziausias
+        // Best to group the assets to borrow and collateral in some order maybe
+
+        // Ciklo pradzioj randam L_max.
+        // insert code to finde the L_max
+        // L_max definition - skola su didziausia skola
+        // LiquidationInfo memory lMax = findMaxLiquidation(assets);
+
+        // Po L_i norim galeti likviduoti bent L_max.collateral_value - L_i.collateral_value
+
+        // Kaip parinkti collateral tokena tai aisku, bet kaip parinkti repay.
+        // Norim didziausia skola pasilikti galui, kad butu galima likviduoti kuo daugiau
+        // Jeigu esam ribojami uzstato kiekiu tai galim imti ir is main repay valiutos.
+
+        // assets = pickAssetsThatAreBorrowedAndStaked(assets);
+        // for (uint256 i = 0; i < assets.length; i++) {
+        //     console.log("sameToken case", i);
+        //     VTokenInterface repayVToken = assets[i].vtoken;
+        //     console.log("repayVToken", address(repayVToken));
+        //     drainLiquidationInternal(borrower, repayVToken, repayVToken);
+        // }
+
+        console.log("Tests case end");
+    }
+
+    function logHealthFactor(
+        address borrower,
+        VTokenInterface repayVToken,
+        VTokenInterface collateralVToken
+    )
+        private
+        returns (uint256)
+    {
+        uint256 snapshot = vm.snapshot();
+        repayVToken.accrueInterest();
+        collateralVToken.accrueInterest();
+
+        (uint256 borrowCapacity, uint256 borrowed) = getAccountLiquidity(borrower);
+
+        console.log("healthFactor", ratioToString(borrowCapacity, borrowed));
+
+        vm.revertTo(snapshot);
+        return 0;
+    }
+
+    function ratioToString(uint256 numerator, uint256 denumerator) internal pure returns (string memory) {
+        uint256 integerPart = numerator / denumerator;
+        uint256 fractionPart = (numerator - (integerPart * denumerator)) * 1e18 / denumerator;
+
+        string memory integerString = uintToString(integerPart);
+
+        uint256 digits = 18;
+        bytes memory buffer = new bytes(digits);
+        uint256 value = fractionPart;
+        while (value != 0) {
+            digits -= 1;
+            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            value /= 10;
+        }
+        while (digits != 0) {
+            digits -= 1;
+            buffer[digits] = bytes1("0");
+        }
+        string memory fractionString = string(buffer);
+
+        return string(abi.encodePacked(integerString, ".", fractionString));
+    }
+
+    function uintToString(uint256 value) internal pure returns (string memory) {
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        while (value != 0) {
+            digits -= 1;
+            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            value /= 10;
+        }
+        return string(buffer);
+    }
+
+    struct AccountLiquidityLocalVars {
+        uint256 sumCollateral;
+        uint256 sumBorrowPlusEffects;
+        uint256 vTokenBalance;
+        uint256 borrowBalance;
+        uint256 exchangeRateMantissa;
+        uint256 oraclePriceMantissa;
+        Exp collateralFactor;
+        Exp exchangeRate;
+        Exp oraclePrice;
+        Exp tokensToDenom;
+    }
+
+    function getAccountLiquidity(address account) private view returns (uint256, uint256) {
+        AccountLiquidityLocalVars memory vars; // Holds all our calculation results
+        uint256 oErr;
+
+        // For each asset the account is in
+        address[] memory assets = comptroller.getAssetsIn(account);
+        uint256 assetsCount = assets.length;
+        for (uint256 i = 0; i < assetsCount; ++i) {
+            VTokenInterface asset = VTokenInterface(assets[i]);
+
+            // Read the balances and exchange rate from the vToken
+            (oErr, vars.vTokenBalance, vars.borrowBalance, vars.exchangeRateMantissa) =
+                asset.getAccountSnapshot(account);
+            if (oErr != 0) {
+                revert("SNAPSHOT_ERROR");
+            }
+            (, uint256 collateralFactorMantissa) = ComptrollerInterface(comptroller).markets(address(asset));
+            vars.collateralFactor = Exp({ mantissa: collateralFactorMantissa });
+            vars.exchangeRate = Exp({ mantissa: vars.exchangeRateMantissa });
+
+            // Get the normalized price of the asset
+            vars.oraclePriceMantissa = ComptrollerInterface(comptroller).oracle().getUnderlyingPrice(address(asset));
+            if (vars.oraclePriceMantissa == 0) {
+                revert("PRICE_ERROR");
+            }
+            vars.oraclePrice = Exp({ mantissa: vars.oraclePriceMantissa });
+
+            // Pre-compute a conversion factor from tokens -> bnb (normalized price value)
+            vars.tokensToDenom = mul_(mul_(vars.collateralFactor, vars.exchangeRate), vars.oraclePrice);
+
+            // sumCollateral += tokensToDenom * vTokenBalance
+            vars.sumCollateral = mul_ScalarTruncateAddUInt(vars.tokensToDenom, vars.vTokenBalance, vars.sumCollateral);
+
+            // sumBorrowPlusEffects += oraclePrice * borrowBalance
+            vars.sumBorrowPlusEffects =
+                mul_ScalarTruncateAddUInt(vars.oraclePrice, vars.borrowBalance, vars.sumBorrowPlusEffects);
+        }
+
+        VAIControllerInterface vaiController = VAIControllerInterface(ComptrollerInterface(comptroller).vaiController());
+
+        if (address(vaiController) != address(0)) {
+            try vaiController.getVAIRepayAmount(account) returns (uint256 vaiDebt) {
+                vars.sumBorrowPlusEffects = add_(vars.sumBorrowPlusEffects, vaiDebt);
+            } catch {
+                // The getVAIRepayAmount got implemented only later
+            }
+        }
+
+        return (vars.sumCollateral, vars.sumBorrowPlusEffects);
     }
 
     function pickAssetsThatAreBorrowedAndStaked(AssetData[] memory assets) private pure returns (AssetData[] memory) {
@@ -436,7 +569,7 @@ contract LiquidationTest is Test, ExponentialNoError {
 
                 // Check if the collateral is enough for the max liquidation of this token
                 uint256 repayValue = borrowValue / 2; // 50% close factor
-                uint256 redeemValue = repayValue * 11 / 10; // 10% incentive
+                uint256 redeemValue = repayValue * 11 / 10; // 10% incentive. TODO use the current percentage
 
                 borrowAssetHasEnoughCollateral = collateralValue >= redeemValue;
             }
@@ -487,6 +620,9 @@ contract LiquidationTest is Test, ExponentialNoError {
         }
         return assets;
     }
+
+    // Jeigu visi vienodo ordering tai pazymekim ir neleiskim reverse
+    function orderAssetsByAscendingCollateralFactor(AssetData[] memory) private returns (AssetData[] memory) { }
 
     function logAssets(AssetData[] memory assets) private pure {
         for (uint256 i = 0; i < assets.length; i++) {
@@ -698,14 +834,12 @@ contract LiquidationTest is Test, ExponentialNoError {
         VTokenInterface vTokenBorrowed,
         VTokenInterface vTokenCollateral,
         uint256 repayAmount,
-        address borrower
+        address borrower // For testing to ensure the correctness of the result
     )
         private
         returns (uint256)
     {
-        if (repayAmount == 0) {
-            return 0;
-        }
+        if (repayAmount == 0) return 0;
 
         // Ensure that the effective repay amount gives the same collateral as the original repay amount
         uint256 collateralGainedWithOriginalRepayAmount;
