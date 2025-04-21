@@ -1,0 +1,382 @@
+%%%%%
+%%%%%  Naudokite LUALATEX, ne LATEX.
+%%%%%
+%%%%
+\documentclass[]{VUMIFTemplateClass}
+
+\usepackage{indentfirst}
+\usepackage{amsmath, amsthm, amssymb, amsfonts}
+\usepackage{mathtools}
+\usepackage{physics}
+\usepackage{graphicx}
+\usepackage{verbatim}
+\usepackage[hidelinks]{hyperref}
+\usepackage{color,algorithm,algorithmic}
+\usepackage[nottoc]{tocbibind}
+\usepackage{tocloft}
+
+\usepackage{titlesec}
+\newcommand{\sectionbreak}{\clearpage}
+
+\makeatletter
+\renewcommand{\fnum@algorithm}{\thealgorithm}
+\makeatother
+\renewcommand\thealgorithm{\arabic{algorithm} algoritmas}
+
+
+
+\usepackage{biblatex}
+\bibliography{bibliografija}
+%% norint pakeisti bibliografijos šaltinių numeravimą (skaitiniu arba raidiniu), pakeitimus atlikti VUMIFTemplateClass.cls 150 eilutėje
+
+% Author's MACROS
+\newcommand{\EE}{\mathbb{E}\,} % Mean
+\newcommand{\ee}{{\mathrm e}}  % nice exponent
+\newcommand{\RR}{\mathbb{R}}
+
+
+\studijuprograma{Programų sistemų} %Studijų programą įrašyti kilmininko linksniu (pavyzdžiui – Programų sistemų, Finansų ir draudimų matematikos ir t. t.)
+\darbotipas{Praktikos ataskaita} % Bakalauro baigiamasis darbas arba magistro baigiamasis darbas
+
+
+\autorius{Vismantas Stonkus}
+\vadovas{Prof. dr. Remigijus Paulavičius}
+\institucija{Humbility, UAB}
+\institucijosVadovas{Mantas Sakalauskas}
+\institucijosIvertinimas{10}
+
+
+\begin{document}
+\selectlanguage{lithuanian}
+
+\onehalfspacing
+\input{titulinis}
+
+
+\singlespacing
+
+%Turinys
+\tableofcontents
+\onehalfspacing
+
+\sectionnonum{Įvadas}
+
+\subsection*{Motyvacija}
+Perėjimas iš tradicinės korporacinės įmonės į dinamišką \textit{Humbility, UAB} startup'ą buvo sąmoningas karjeros pasirinkimas. Ankstesnėje darbo vietoje susidūriau su išsibranžiusiais procesais ir lėtu sprendimų priėmimu, kuris ribojo techninę pažangą. \textit{Humbility} pasiūlė visiškai priešingą aplinką - greitus iteracijos ciklus, tiesioginę įtaką produkto vystymui ir galimybę dirbti su pažangiausiomis didelio dažnio prekybos technologijomis. Šis kontekstas tapo idealiu testavimo lauku įgytoms žinioms pritaikyti praktikoje.
+
+\subsection*{Praktikos tikslai ir uždaviniai}
+Pagrindinė praktikos tema - kriptovaliutų prekybos sistemų kūrimas ir tobulinimas naudojant Go bei Rust programavimo kalbas, su specialiu dėmesiu likvidacijų integravimui į arbitražo sistemas.
+
+Pagrindiniai tikslai:
+\begin{itemize}
+\item Įgyti praktinių žinių debesijos (ang. cloud) technologijų taikyme finansinių sistemų kūrime
+\item Išmokti integruoti skirtingus kriptovaliutų rinkos mechanizmus
+\item Išmokti efektyvių tarp-serverių komunikacijos optimizavimo metodų
+\end{itemize}
+
+Konkretūs praktikos uždaviniai:
+\begin{enumerate}
+\item Išstudijuoti Go ir Rust kalbų bibliotekas, reikalingas kriptovaliutų prekybai
+\item Įvaldyti įmonėje naudojamą kriptovaliutų prekybos ir stebėjimo programinę įrangą
+\item Kūrybiškai taikyti žinias kuriant ir tobulinant prekybos sistemas
+\item Atlikti išsamų sukurtų sistemų testavimą realiomis rinkos sąlygomis
+\end{enumerate}
+
+\subsection*{Praktikos vykdymo planas}
+Praktikos periodas (10 savaičių) suskirstytas į logiškus etapus:
+
+\begin{itemize}
+\item \textbf{1 savaitė}: Adaptacinis periodas - susipažinimas su įmonės infrastruktūra, kodo baze ir darbo metodologijomis
+
+\item \textbf{2 savaitė}: Tyrimų etapas - analizuojamas skolinimosi ir likvidacijų mechanizmų veikimas kriptovaliutų rinkoje
+
+\item \textbf{3-5 savaitės}: Duomenų rinkimas ir analizė - sistemingas skolininkų stebėjimas, likvidacijos momentų identifikavimas
+
+\item \textbf{6-7 savaitės}: Integracijos darbai - likvidacijų mechanizmų įterpimas į esamą arbitražo paieškos sistemą
+
+\item \textbf{8-10 savaitės}: Testavimas ir optimizavimas - sukurtų sprendimų patikrinimas realiomis sąlygomis ir nuolatinis tobulinimas
+\end{itemize}
+
+Šis struktūruotas planas leis sistemingai įgyvendinti praktikos tikslus, užtikrinant tiek mokymosi, tiek realios pridėtinės vertės kūrimą įmonės veikloje.
+
+\section{Įmonė}
+
+\subsection{Bendras apžvalga}
+\textit{Humbility UAB} yra kriptovaliutų prekybos įmonė, specializuojanti arbitražo operacijose tarp įvairių biržų. Įmonė veikia tiek centralizuotose (CEX), tiek decentralizuotose (DEX) kriptovaliutų biržose, taikydama tris pagrindines strategijas:
+\begin{itemize}
+\item DEX orientuotą strategiją
+\item CEX orientuotą strategiją
+\item Hibridinę strategiją, jungiančią abi platformas
+\end{itemize}
+
+\subsection{Organizacinė struktūra}
+Įmonėje vyrauja lanksti horizontalia struktūra su aiškiai apibrėžtomis funkcinėmis rolėmis:
+
+\begin{itemize}
+\item \textbf{Produkto savininkas}:
+\begin{itemize}
+\item Formuluoja produkto vystymo strategiją ir ilgalaikę viziją
+\item Prioritetizuoja funkcijų kūrimo eigą pagal verslo poreikius
+\item Užtikrina produkto stabilumą ir tęstinį tobulinimą
+\item Vykdo reguliarų darbuotojų vertinimą:
+\begin{itemize}
+\item Individualūs susitikimai (1-on-1) kas 4-6 savaites
+\item Konstruktyvus atsiliepimas apie darbą
+\item Darbuotojų motivavimas ir karjeros planavimas
+\end{itemize}
+\item Koordinuoja komunikaciją tarp verslo ir techninių komandų
+\end{itemize}
+
+\item \textbf{Techninis lyderis}:
+\begin{itemize}
+\item Apibrėžia techninius standartus ir gaires
+\item Užtikrina sistemų architektūros vientisumą
+\item Koordinuoja techninius sprendimus tarp komandų
+\end{itemize}
+
+\item \textbf{Programuotojas}:
+\begin{itemize}
+\item Kūria ir įgyvendina algoritminės prekybos sprendimus
+\item Diagnozuoja ir taiso sistemos problemas, įskaitant:
+\begin{itemize}
+\item Loginės sistemos klaidas
+\item Tarp-serverių komunikacijos trikdžius
+\end{itemize}
+\item Integruoja naujas kriptovaliutų biržas į prekybos sistemą
+\end{itemize}
+
+\item \textbf{Analitikų vadovas}:
+\begin{itemize}
+\item Koordinuoja analitinių įrankių kūrimą
+\item Valdo kapitalo paskirstymo ir balansų kontrolės procesus
+\item Vadovauja analitikų komandai
+\end{itemize}
+
+\item \textbf{Duomenų analitikas}:
+\begin{itemize}
+\item Atlieka rinkos analizę ir konkurencijos monitoringą
+\item Identifikuoja naujus pelno generavimo galimybes
+\item Sukuria automatinius sistemos veiklos monitoringo įrankius
+\end{itemize}
+
+\end{itemize}
+
+Praktikoje dažnai pasitaiko situacijų, kai vienas darbuotojas atlieka kelių rolėms būdingas funkcijas, kas leidžia optimizuoti žmogiškuosius išteklius ir palaikyti organizacijos lankstumą.
+
+\subsection{Veiklos ypatumai}
+\textit{Humbility} yra savarankiška įmonė be išorinių investuotojų, kurios visi valdybos nariai yra aktyvūs projekto dalyviai. Ši struktūra leidžia:
+\begin{itemize}
+\item Greitai priimti sprendimus be biurokratinių kliūčių
+\item Lanksčiai reaguoti į rinkos pokyčius
+\item Nuolat inovuoti ir tobulinti prekybos sistemas
+\end{itemize}
+
+\subsection{Darbo sąlygos}
+Įmonė siūlo unikalias darbo sąlygas, pritaikytas kriptovaliutų rinkos specifikai:
+\begin{itemize}
+\item \textbf{Elastingas darbo grafikas} - darbas nevaržomas tradicinių darbo valandų
+\item \textbf{Studentų draugiška aplinka} - studentams suteikiama galimybė derinti darbą su studijomis
+\item \textbf{Moderni darbo erdvė} - Vilniaus biure įrengta atvira darbo zona, skatinanti tiesioginį bendravimą
+\item \textbf{Ribota nuotolinio darbo galimybė} - tam tikrais atvejais, pagal poreikį ir susitarimą, leidžiama dirbti nuotoliniu būdu
+\end{itemize}
+
+%% snap
+\section{Darbas praktikos metu}
+
+\subsection{Vystomas produktas}
+
+Įmonėje dirbau komandoje, kurios pagrindinis tikslas – išnaudoti decentralizuotas kriptovaliutų rinkas siekiant pelno. Skirtingai nuo įprastų arbitražo strategijų, mūsų komanda daugiausiai dėmesio skiria atominiam arbitražui, vykdomam pačiose blokų grandinės (blockchain) sistemose, be jokios centrinės keityklos įsikišimo. Tai leidžia pasinaudoti decentralizuotų finansų (DeFi) rinkų neefektyvumais ir saugiai įvykdyti arbitražo operacijas vienos transakcijos metu.
+
+\subsubsection{Arbitražas}
+
+Arbitražas – tai finansinė strategija, kai pasinaudojama kainų skirtumais tarp skirtingų rinkų siekiant gauti pelną be (ar beveik be) rizikos. Kriptovaliutų kontekste tai dažniausiai reiškia valiutų konvertavimą skirtinguose decentralizuotuose keityklose.
+
+\subsubsection{Atomiškumas}
+
+Atomiškumas (angl. atomicity) reiškia, kad operacija vyksta „viskas arba nieko“ principu. Blockchain sistemose tai itin svarbu, nes leidžia užtikrinti, kad arbitražo grandinė bus sėkminga tik tada, kai įvykdomi visi sandoriai – kitaip ji atšaukiama. Tokiu būdu išvengiama situacijų, kai tik dalis konversijų įvykdoma, ir likusi dalis sukelia nuostolius. Šis principas yra kertinis atominio arbitražo dalis, nes garantuoja, kad kiekviena grandinė yra pelninga ir rizika minimali.
+
+\subsection{Komandos procesai}
+
+Komanda dirba be griežtų „sprintų“ ar iteracijų – kiekvienas komandos narys pats planuoja savo darbus ir vykdo užduotis tol, kol jos yra užbaigiamos. Baigus užduotį, kreipiamasi į produktų vadovą (product owner), kuris paskiria sekančią užduotį ar nukreipia tolimesniam darbui.
+
+Darbo eiga prižiūrima per „Slack“ susirašinėjimo platformą – kiekvieną rytą komandos nariai pateikia trumpą ataskaitą: kas buvo padaryta vakar ir ką planuoja šiandien. Tai padeda palaikyti komandinį skaidrumą ir sekti progresą realiu laiku.
+
+Kartą per mėnesį organizuojamas bendras komandos susitikimas, kurio metu aptariami praėjusio mėnesio rezultatai, apžvelgiamos reikšmingesnės techninės ar verslo įžvalgos, bei nusibrėžiamos kryptys didesnio masto (angl. scope) darbams artimiausiam laikotarpiui. Toks lankstus procesas leidžia greitai prisitaikyti prie besikeičiančių prioritetų ir veiksmingai spręsti aktualiausias problemas.
+
+\subsection{Likvidacijų integracija į sistemą}
+
+Vienas iš praktikos tikslų buvo sujungti likvidacijos mechanizmą su esama arbitražo sistema. Tai leido sukurti papildomą pelno šaltinį: kai arbitražo sistema randa pelningą valiutų keitimą, prie jos prijungus likvidacijos galimybę, galima ne tik uždirbti iš kainų skirtumų, bet ir papildomai gauti likvidatoriaus atlygį.
+
+Į likvidacijų procesą buvo integruoti algoritmai, leidžiantys automatizuotai patikrinti ar paskola tapo likviduojama, nustatyti optimalų grąžinamos paskolos dydį ir užstato valiutą, bei suplanuoti pelningiausią valiutų konversijų seką. Įgyvendintas sprendimas analizuoja realaus laiko duomenis iš blokų grandinės ir orakulo, bei vykdo transakciją tik jei įvykdoma visa grandinė atominėmis sąlygomis.
+
+\subsubsection{Likvidacijos}
+
+Praktikos metu buvo analizuotas \textit{Venus} paskolų protokolo likvidavimo mechanizmas, veikiantis \textit{Binance Smart Chain (BSC)} tinkle. Šios analizės pagrindu buvo sukurtas algoritmas, kuris leidžia automatiškai nustatyti, kada paskolos pozicija tampa likviduojama, ir įvykdyti likvidaciją siekiant maksimalaus pelno.
+
+Sukurtas sprendimas vertina tiek galimą finansinę grąžą, tiek ir transakcijų sąnaudas (angl. \textit{gas}), kad būtų užtikrintas optimalus efektyvumo ir pelningumo santykis. Sistema buvo integruota į esamą arbitražo įrankį, išplečiant jo galimybes ir suteikiant papildomą pajamų šaltinį.
+
+Gilinantis į šią temą teko susipažinti su paskolų platformoms būdingais terminais ir principais:
+
+\begin{itemize}
+  \item \textbf{Pozicija (angl. \textit{position})} – naudotojo turimų užstatų ir paskolų rinkinys, išskaidytas pagal valiutas. Kiekviena tokia pozicija turi savo rizikos ir likvidumo lygį.
+  
+  \item \textbf{Likvidacijos paskata} – procentinis priedas, kurį gauna likvidatorius už atliktą likvidaciją. \textit{Venus} protokole ši paskata siekia 10\% nuo grąžinamos skolos sumos, taip skatinant kuo greitesnį reagavimą į rizikingas pozicijas.
+  
+  \item \textbf{Likvidavimo slenkstis (angl. \textit{liquidation threshold, LT})} – procentas, kuriuo užstato vertė įskaitoma į bendrą skolinimosi pajėgumą. Kiekviena valiuta turi atskirą $LT$ reikšmę (paprastai nuo 60\% iki 90\%).
+
+  \item \textbf{Uždarymo riba (angl. \textit{close factor, CF})} – maksimali skolos dalis, kuri leidžiama būti grąžinta vienos likvidacijos metu. \textit{Venus} protokole ši riba yra 50\%.
+
+  \item \textbf{Skolinimosi pajėgumas (angl. \textit{borrowing capacity, BC})} – tai bendra skolos vertė, kurią skolininkas gali turėti, atsižvelgiant į užstato sumą ir $LT$:
+  \[
+    \text{BC} = \sum_{i} \left( \text{Užstato vertė}_{i} \times LT_{i} \right)
+  \]
+
+  \item \textbf{Sveikumo koeficientas (angl. \textit{health factor, HF})} – tai santykis tarp skolinimosi pajėgumo ir faktinės skolos:
+  \[
+    \text{HF} = \frac{\text{BC}}{\sum_{i} \text{Skolos vertė}_{i}}
+  \]
+  Kai $HF < 1$, skolininko pozicija laikoma pažeidžiančia saugumo reikalavimus ir tampa likviduojama.
+\end{itemize}
+
+Likviduojant poziciją, būtina pasirinkti konkrečią paskolos ir užstato valiutų porą, taip pat – grąžintinos sumos dydį. Jeigu po pirmos likvidacijos pozicija vis dar išlieka nesaugi ($HF < 1$), likvidacija gali būti kartojama kelis kartus. Dėl šių niuansų reikėjo ne tik sukurti logiką sprendimo paieškai, bet ir atsižvelgti į visus ribojančius faktorius, kad sprendimas būtų finansiškai pagrįstas ir techniškai korektiškas.
+
+\subsubsection{Našumo problema ir sprendimas}
+
+Integruojant likvidacijos algoritmą į arbitražo sistemą, buvo susidurta su rimta našumo problema. Kadangi aktyvių skolininkų kiekis siekia dešimtis tūkstančių, kiekvienas valiutos kainos pokytis reikalauja peržiūrėti visų skolininkų pozicijas ir perskaičiuoti jų sveikumo koeficientą ($HF$), siekiant nustatyti ar pozicija tampa likviduojama. Šis procesas tapo akivaizdžiai per lėtas realaus laiko sistemai, kur kainos nuolat kinta.
+
+Siekiant šią problemą išspręsti, buvo sukurta specializuota duomenų struktūra – \texttt{zeroCenteredSet}. Šios struktūros principas remiasi tuo, kad kiekvienas skolininkas, priklausomai nuo turimų valiutų ir jų užstato santykio, yra priskiriamas prie tam tikros vietos skirtingose valiutų skalėse. Kiekviena tokia skalė yra centrinė pagal pradinę valiutos kainą ir išsiplečia tiek į teigiamą, tiek į neigiamą pusę – t. y. skalė yra simetriška aplink nulį.
+
+Kiekvieno skolininko pozicijos vieta šioje skalėje nusako, kokio dydžio kainos pokytis konkrečiai valiutai reikalingas, kad ta pozicija taptų likviduojama. Kai valiutos kaina keičiasi, apskaičiuojamas kainos pokytis nuo pradinės (ref) reikšmės, ir struktūra leidžia greitai išrinkti tik tuos skolininkus, kuriems šis pokytis reikšmingas. Taip eliminuojama būtinybė tikrinti visų skolininkų pozicijas, kas leidžia drastiškai sumažinti perskaičiavimų kiekį.
+
+\texttt{zeroCenteredSet} struktūra tapo esmine sistemos dalimi, leidžiančia užtikrinti greitą reagavimą į rinkos pokyčius ir išlaikyti sistemą efektyvią net ir esant itin didelei aktyvių paskolų bazei.
+
+\subsubsection{Darbas su Rust programavimo kalba blockchain aplinkoje}
+
+Praktikos metu taip pat teko dirbti su Rust programavimo kalba, ypač kontekste, kai kodas buvo leidžiamas tiesiogiai „on-chain“, t. y. vykdomas blockchain'e kaip išmaniosios sutartys arba jų komponentai. Tokie sprendimai reikalauja ypatingo dėmesio efektyvumui, saugumui ir deterministiniam veikimui – savybėms, kurios būdingos Rust kalbai.
+
+Kadangi Rust iki tol buvau naudojęs tik lokalioms sistemoms ar CLI įrankiams, reikėjo greitai perprasti blockchain’ui pritaikytą programavimo paradigmą, ypač su tokiais framework’ais kaip \texttt{Ink!} (Polkadot ekosistemoje) ar \texttt{Solang} (Solidity–Rust transpiliatorius). Taip pat teko susipažinti su mažo footprint’o reikalavimais – visi on-chain veikiantys moduliai turi būti maksimaliai kompaktiški ir optimizuoti, nes kiekvienas papildomas baitas padidina transakcijų sąnaudas.
+
+Vienas iš svarbių uždavinių buvo Rust kalba papildyti modulį, kuris tikrina ar vartotojo pozicija atitinka saugumo reikalavimus, ir jei ne – inicijuoja likvidacijos logiką. Tai buvo neatskiriama nuo kitų sistemų, veikiančių decentralizuotoje aplinkoje, todėl reikėjo užtikrinti maksimalų suderinamumą su blockchain vykdymo aplinka.
+
+Teko išmokti Rust ypatybių, kurios ypač svarbios dirbant su blockchain:
+
+\begin{itemize}
+  \item \textbf{Ownership ir borrow checker} – garantuoja atminties saugumą be garbage collection, kas labai svarbu deterministiniam vykdymui.
+  \item \textbf{No-std aplinka} – on-chain kodas dažnai vykdomas be standartinės bibliotekos (std), todėl reikia naudoti specializuotus \texttt{core} ir \texttt{alloc} modulius.
+  \item \textbf{Serde serializacija} – duomenų struktūrų konvertavimas į byte formą bei atgal, būtinas siekiant suderinamumo su blockchain protokolais.
+  \item \textbf{Panic-free kodas} – kiekviena panika (angl. \textit{panic}) on-chain aplinkoje reiškia transakcijos atmetimą, todėl būtina naudoti saugius ir atidžiai tikrinamus skaičiavimus.
+\end{itemize}
+
+Šis darbas ne tik sustiprino mano Rust kalbos žinias, bet ir atvėrė naują požiūrį į tai, kaip programuojamos decentralizuotos sistemos. Įgyta patirtis bus neabejotinai naudinga tolesniam darbui blockchain srityje, kur Rust tampa vis svarbesniu pasirinkimu dėl savo našumo ir saugumo.
+
+\subsection{Darbas su debesija}
+Praktikos metu taip pat teko prisidėti prie debesijos infrastruktūros palaikymo ir plėtros. Komanda palaiko keliolika serverių, išdėstytų įvairiose geografinėse lokacijose – tai leidžia optimizuoti arbitražo sistemų veikimą, atsižvelgiant į konkrečių biržų ar tinklų geografinį išsidėstymą ir atsako laikus.
+
+Visas mūsų rašomas kodas yra diegiamas į serverius naudojant automatizuotus diegimo procesus – tam pasitelkiami GitHub Actions (CI/CD workflows) ir konfigūracijos valdymo įrankis Ansible. Tokia automatizacija leidžia greitai ir saugiai atlikti pakeitimus visoje infrastruktūroje bei užtikrinti, kad skirtingose lokacijose veikiantys serveriai naudoja tą pačią, patikrintą versiją.
+
+Keli serveriai yra dedikuoti tik testavimui. Visi pakeitimai prieš diegiant į produkciją pirmiausia įkeliami ir testuojami šiose aplinkose. Tai leidžia užtikrinti, kad nauji moduliai, algoritmai ar optimizacijos nesukels netikėtų klaidų ar trikdžių realiuose prekybos procesuose. Tik įsitikinus jų stabilumu ir veikimu, kodas perkeliamas į gamybinę (angl. production) aplinką.
+
+Toks infrastruktūros valdymas ir diegimo procesas yra būtinas norint užtikrinti stabilų ir nenutrūkstamą sistemų veikimą itin jautriame – finansinių operacijų – kontekste.
+
+\subsection{Decentralizuotų finansų (DeFi) rinkos dinamika}
+
+Dirbant su likvidacijomis ir arbitražo algoritmais neišvengiamai tenka gilintis ne tik į techninę infrastruktūrą, bet ir į pačios DeFi rinkos dinamiką. Ši rinka yra ypatinga tuo, kad viskas vyksta realiuoju laiku, be centrinio valdymo, o naudotojų elgsena ir turto vertės pokyčiai dažnai yra nulemti tiek makroekonominių veiksnių, tiek „on-chain“ paskatų.
+
+Dėl šios priežasties svarbu ne tik gebėti vykdyti arbitražo operacijas ar aptikti rizikingas paskolų pozicijas, bet ir suprasti, kaip kinta likvidumo baseinai, kaip veikia AMM (automatizuoti rinkos formuotojai), kokios rizikos kyla dėl „flash loan“ atakų, ar kaip susidaro „front-running“ situacijos. Visa tai tiesiogiai susiję su likvidacijų vykdymu, nes netikėtas rinkos paslydimas (angl. slippage) ar gas kainos šuolis gali padaryti anksčiau pelningą sandorį – nuostolingu.
+
+Be to, kiekvienas išmanusis kontraktas (smart contract), kurį bandoma iškviesti ar su juo sąveikauti, turi savo būseną, kas reikalauja nuolat palaikyti duomenų aktualumą. Todėl buvo būtina įdiegti realaus laiko stebėseną (angl. live monitoring), kuri leidžia tiksliai fiksuoti rinkos būsenos pokyčius blokas po bloko.
+
+\subsection{Realiojo laiko duomenų valdymo iššūkiai}
+
+Darbo metu teko susidurti su dar viena aktualia problema – kaip užtikrinti, kad sistema greitai ir tiksliai reaguotų į išorinius įvykius, tokius kaip blokų generavimas, orakulo kainų atnaujinimas ar vartotojų atliekami veiksmai grandinėje. Nors dalis šios informacijos gaunama per orakulus, kita dalis – tiesiai per RPC sąsajas, tai reikalauja labai efektyvaus ir asinchroninio architektūrinio modelio.
+
+Pritaikytas sprendimas – tai duomenų transliavimo (angl. streaming) sistema, kuri palaiko WebSocket ryšį su blokų grandinės mazgais ir leidžia gauti informaciją blokas po bloko, o ne tik periodiškai. Tai leido ne tik padidinti reakcijos greitį, bet ir sumažinti nereikalingų užklausų skaičių, kas svarbu dėl gas ir laiko sąnaudų.
+
+Taip pat buvo įdiegta lokali cache sistema, kuri leidžia išsaugoti dažniausiai naudojamą informaciją (pvz. token'ų kainas ar protokolų parametrus) atmintyje, kad būtų galima išvengti dažno kreipimosi į išorinius orakulus ar mazgus. Šie optimizaciniai sprendimai užtikrino didesnį patikimumą ir sumažino sistemos reakcijos laiką – tai ypač svarbu arbitražo ir likvidacijų operacijoms, kurios turi būti įvykdytos per kelias sekundes ar net greičiau.
+
+\subsection{Etiniai aspektai blockchain sistemose}
+
+Praktikos metu taip pat buvo keliami klausimai dėl etinių aspektų – ar arbitražas ir likvidacijos nekenkia kitiems naudotojams? Nors techniškai tai yra visiškai teisėti ir netgi protokolų skatinami veiksmai, svarbu suprasti kontekstą: likvidatoriai padeda išlaikyti sistemų stabilumą ir užtikrina, kad skolininkų rizikingos pozicijos būtų uždarytos laiku. Kita vertus, tai taip pat reikalauja labai atsakingo požiūrio – sistemą reikia suprojektuoti taip, kad nebūtų piktnaudžiavimo, pvz. vykdant likvidacijas esant netiksliai kainų informacijai.
+
+Šie klausimai tapo svarbia refleksijos dalimi – blockchain technologijos suteikia laisvę, bet ir atsakomybę. Tai buvo puiki proga ne tik pritaikyti techninius įgūdžius, bet ir permąstyti, kokią įtaką kuriama sistema turi platesniame finansinių ekosistemų kontekste.
+
+\subsection{Testavimo praktika blockchain kontekste}
+
+Vienas iš svarbiausių komponentų, siekiant sukurti patikimą sistemą blockchain aplinkoje, yra kruopštus testavimas. Kadangi kiekviena transakcija blockchain’e gali kainuoti realius pinigus (dėl „gas“ sąnaudų) ir yra negrįžtama, būtina užtikrinti, kad visas kodas elgsis tiksliai taip, kaip tikimasi. Praktikos metu teko parengti ne tik lokalius vienetinius testus, bet ir integracinius testus, kurie simuliuoja visą likvidacijos arba arbitražo procesą nuo pradžios iki pabaigos.
+
+Daug dėmesio buvo skirta testavimui atsižvelgiant į kraštines situacijas – pavyzdžiui, kas nutinka, jei kainos duomenys atkeliauja vėluodami, jei sandoris trunka ilgiau nei blokas, arba jei transakcija atmetama dėl „gas limit“ viršijimo. Tam buvo sukurti įvairūs testų scenarijai, kuriuose naudojami tiek „mock“ duomenys, tiek testnet tinkle atliekami realūs testai su ribota rizika.
+
+Taip pat buvo sukurti specialūs diagnostiniai įrankiai, leidžiantys sekti sistemos veikimą realiuoju laiku ir fiksuoti įtartinus atvejus. Pavyzdžiui, jei arbitražo transakcija nebuvo įvykdyta dėl konkurento „front-running“ veiksmo, sistema automatiškai įrašo šį įvykį į diagnostikos žurnalą. Tokie įrankiai padeda ne tik testuoti sistemą kūrimo metu, bet ir palaikyti jos kokybę veikimo laikotarpiu.
+
+Ypatingas dėmesys buvo skiriamas ir deterministiniam elgesiui – blockchain'e negalima naudoti funkcijų, kurios naudoja atsitiktinumą ar relyvuoja į neaiškią laiko informaciją. Todėl testavimo metu buvo tikrinama, ar sistema elgiasi identiškai esant tokioms pačioms pradinėms sąlygoms. Šis aspektas svarbus ne tik techninei kokybei, bet ir norint išlaikyti bendrą protokolų suderinamumą.
+
+Galiausiai, testavimas buvo neatsiejamas nuo CI/CD proceso – kiekvienas pakeitimas GitHub saugykloje automatiškai paleisdavo testų rinkinį, kuris užtikrindavo, kad joks atnaujinimas nesukels regresijų. Tai leido dirbti greitai, bet saugiai, ir garantuoti, kad sistema liks stabili net ir dažnai keičiant logiką ar strategijas.
+
+\section{Rezultatai, išvados ir pasiūlymai}
+
+\subsection{Įgytos žinios}
+
+Praktikos metu įgytos gilios žinios apie decentralizuotų paskolų protokolus, jų veikimo principus ir likvidacijų mechaniką. Buvo praktiškai suprasti tokie svarbūs DeFi pasaulio terminai kaip pozicija, skolinimosi pajėgumas, sveikumo koeficientas, likvidavimo slenkstis, uždarymo riba bei likvidacijos paskata.
+
+Be finansinių sistemų veikimo principų, taip pat įgyta techninių žinių apie programinę inžineriją debesijoje – nuo infrastruktūros valdymo su \texttt{Ansible} ir \texttt{GitHub Actions}, iki automatizuoto kodo diegimo keliuose geografiniuose serveriuose. Įgyta patirties su test–prod diegimo praktika, užtikrinančia saugią kodų integraciją.
+
+Technologiniu požiūriu pagilintos Go ir Rust programavimo kalbų žinios, įsisavinti įrankiai darbui su blokų grandinės duomenimis (Web3, orakulai, RPC sąsajos). Taip pat sustiprintas supratimas apie atominį arbitražą ir jo įgyvendinimą realiose rinkose su aukštu patikimumu bei rizikos kontrole.
+
+\subsection{Universitete įgytų žinių vertinimas}
+
+Didžioji dalis darbo praktikos metu reikalavo sisteminio mąstymo, inžinerinės logikos ir gero algoritmų išmanymo – sritys, kurios buvo stipriai lavinamos universiteto studijų metu. Tokie dalykai kaip duomenų struktūros, operacijų sistemų pagrindai, testavimas ir sistemų architektūra pasitarnavo tiek suprantant egzistuojančią infrastruktūrą, tiek ją pritaikant ar tobulinant.
+
+Vis dėlto, debesijos technologijų ir decentralizuotų finansų (DeFi) taikymas buvo ribotai (arba visai ne) nagrinėjami studijų programoje. Praktikoje teko pirmą kartą gilintis į „production-grade“ infrastruktūrą, kur automatizacija, CI/CD procesai ir distribucinis sistemų valdymas yra būtini norint užtikrinti nepertraukiamą paslaugų veikimą.
+
+\subsection{Darbo komandoje privalumai}
+
+\begin{itemize}
+    \item Laisva, bet efektyvi darbo struktūra be sprintų, leidžianti susikoncentruoti į užduotis.
+    \item Komandos nariai puikiai įvaldę technines sritis, pasiruošę dalintis žiniomis.
+    \item Galimybė iš karto pamatyti, kaip tavo parašytas kodas veikia realiose situacijose – nuo testavimo iki deploy į produkciją.
+    \item Nuolatinis ryšys su produkto savininku, kuris greitai suteikia grįžtamąjį ryšį ir padeda fokusuotis į svarbiausias funkcijas.
+    \item Kiekvieno komandos nario savarankiškumas ir pasitikėjimas vieni kitais.
+\end{itemize}
+
+\subsection{Darbo komandoje trūkumai}
+
+\begin{itemize}
+    \item Kadangi komanda dirba be sprintų, kartais gali kilti neapibrėžtumo pojūtis – ypač naujiems komandos nariams.
+    \item Nėra automatizuotos užduočių valdymo sistemos (pvz. JIRA, Linear), todėl užduotys valdomos neformaliai per Slack – tai reikalauja geros savidisciplinos.
+    \item Testavimo serverių resursai riboti – kartais tai apsunkina paruoštų funkcijų tikrinimą paraleliai vykdomiems kitiems testams.
+\end{itemize}
+
+\subsection{Pasiūlymai}
+
+\subsubsection{Universitetui}
+
+\begin{itemize}
+    \item Įtraukti daugiau modulių, orientuotų į modernias infrastruktūros ir debesijos technologijas, ypač praktiniu lygmeniu.
+    \item Suteikti studentams galimybę rinktis pasirenkamuosius dalykus iš kitų susijusių programų (pvz. DeFi, DevOps, distrib. sistemos).
+    \item Skatinti projektus, kurie simuliuotų realias „legacy“ kodo bazes – studentai galėtų mokytis dirbti ne tik nuo nulio, bet ir tobulinti esamas sistemas.
+    \item Įtraukti decentralizuotų sistemų (blockchain) pagrindus kaip pasirenkamą modulį.
+\end{itemize}
+
+\subsubsection{Įmonei}
+
+\begin{itemize}
+    \item Sukurti paprastą vidinę žinių bazę, kur būtų aprašyti dažniausiai pasitaikantys procesai (deployment, testing, debug scenarijai).
+    \item Formalizuoti vidinį „mentoring“ procesą naujokams, kad būtų greičiau įsisavinama sistema.
+    \item Praplėsti testinių serverių galimybes arba įgalinti lokalų testavimą „staging“ režimu su realaus duomenų mockais.
+\end{itemize}
+
+\subsection{Darbo rezultatai ir išvados}
+
+Praktikos metu buvo pasiekti šie pagrindiniai rezultatai:
+
+\begin{enumerate}
+    \item Išanalizuotas \textit{Venus} paskolų protokolo veikimas ir sukurti algoritmai, leidžiantys automatiškai nustatyti likviduojamas pozicijas bei vykdyti pelningą likvidaciją.
+    \item Integruotas likvidacijos algoritmas į esamą arbitražo sistemą, išplečiant jos funkcionalumą.
+    \item Suprogramuota atskiro komponento testavimo infrastruktūra su palaikymu test serveriuose.
+    \item Sukurti CI/CD workflow’ai, leidžiantys automatizuotai deploy’inti kodą į realias geografiškai paskirstytas lokacijas.
+    \item Pagerintas sistemos atsparumas rizikingoms transakcijoms per atominį arbitražo ir likvidacijų mechanizmą.
+\end{enumerate}
+
+Apskritai, praktika buvo ne tik vertinga profesiškai, bet ir leido įgyti praktinių žinių, kurių nebuvo galimybės gauti studijų metu. Dirbant realioje aukšto intensyvumo aplinkoje teko priimti sprendimus, daryti kompromisus tarp rizikos, kaštų ir pelno, taip pat suvokti kodėl architektūriniai sprendimai daromi vienu ar kitu būdu. Tai buvo puiki patirtis ruošiantis tolesnei karjerai technologijų sektoriuje.
+
+\end{document}
