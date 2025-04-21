@@ -36,4 +36,4 @@ echo "REPAY_AMOUNT=$REPAY_AMOUNT"
 echo "COLLATERAL_V_TOKEN=$COLLATERAL_V_TOKEN"
 echo "EXPECTED_SEIZE=$EXPECTED_SEIZE"
 
-forge test --match-test testLiquidations -vvv
+forge test --match-test testLiquidations -vv
