@@ -17,6 +17,7 @@ pub struct LiquidationData {
     pub repay_amount: U256,
     pub v_token_collateral: String,
     pub seize_tokens: U256,
+    pub gas_price: U256,
 }
 
 pub(crate) fn create_pool() -> Pool {
@@ -153,7 +154,7 @@ VALUES
 (''),-- claim xvs
 ('')
 )
-SELECT transaction_hash, block_number, v_token, borrower, repay_amount::TEXT, v_token_collateral, seize_tokens::TEXT
+SELECT transaction_hash, block_number, v_token, borrower, repay_amount::TEXT, v_token_collateral, seize_tokens::TEXT, seize_tokens::TEXT, gas_price::TEXT
 FROM bsc.venus_liquidations vl
 LEFT JOIN bsc.venus_liquidation_tests vlt USING(transaction_hash)
 WHERE TRUE
@@ -179,9 +180,11 @@ ORDER BY 2 ASC, transaction_index DESC",
         .map(|row| {
             let repay_amount_str: String = row.get(4);
             let seize_tokens_str: String = row.get(6);
+            let gas_price_str: String = row.get(7);
 
             let repay_amount = U256::from_dec_str(&repay_amount_str).unwrap();
             let seize_tokens = U256::from_dec_str(&seize_tokens_str).unwrap();
+            let gas_price = U256::from_dec_str(&gas_price_str).unwrap();
 
             LiquidationData {
                 transaction_hash: row.get(0),
@@ -191,6 +194,7 @@ ORDER BY 2 ASC, transaction_index DESC",
                 repay_amount,
                 v_token_collateral: row.get(5),
                 seize_tokens,
+                gas_price,
             }
         })
         .collect();

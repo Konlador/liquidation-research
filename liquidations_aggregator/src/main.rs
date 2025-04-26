@@ -38,6 +38,7 @@ async fn run_forge_test(liquidation_data: &LiquidationData) -> Result<String, Bo
         .env("REPAY_AMOUNT", liquidation_data.repay_amount.to_string())
         .env("COLLATERAL_V_TOKEN", &liquidation_data.v_token_collateral)
         .env("EXPECTED_SEIZE", liquidation_data.seize_tokens.to_string())
+        .env("GAS_PRICE", liquidation_data.gas_price.to_string())
         .current_dir(parent_dir) // Set the working directory to the parent
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())

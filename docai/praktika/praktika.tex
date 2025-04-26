@@ -97,8 +97,6 @@ Praktikos periodas (10 savaičių) suskirstytas į logiškus etapus:
 \item \textbf{8-10 savaitės}: Testavimas ir optimizavimas - sukurtų sprendimų patikrinimas realiomis sąlygomis ir nuolatinis tobulinimas
 \end{itemize}
 
-Šis struktūruotas planas leis sistemingai įgyvendinti praktikos tikslus, užtikrinant tiek mokymosi, tiek realios pridėtinės vertės kūrimą įmonės veikloje.
-
 \section{Įmonė}
 
 \subsection{Bendras apžvalga}
@@ -256,7 +254,7 @@ Praktikos metu taip pat teko dirbti su Rust programavimo kalba, ypač kontekste,
 
 Kadangi Rust iki tol buvau naudojęs tik lokalioms sistemoms ar CLI įrankiams, reikėjo greitai perprasti blockchain’ui pritaikytą programavimo paradigmą, ypač su tokiais framework’ais kaip \texttt{Ink!} (Polkadot ekosistemoje) ar \texttt{Solang} (Solidity–Rust transpiliatorius). Taip pat teko susipažinti su mažo footprint’o reikalavimais – visi on-chain veikiantys moduliai turi būti maksimaliai kompaktiški ir optimizuoti, nes kiekvienas papildomas baitas padidina transakcijų sąnaudas.
 
-Vienas iš svarbių uždavinių buvo Rust kalba papildyti modulį, kuris tikrina ar vartotojo pozicija atitinka saugumo reikalavimus, ir jei ne – inicijuoja likvidacijos logiką. Tai buvo neatskiriama nuo kitų sistemų, veikiančių decentralizuotoje aplinkoje, todėl reikėjo užtikrinti maksimalų suderinamumą su blockchain vykdymo aplinka.
+Vienas iš svarbių uždavinių buvo Rust kalba papildyti modulį, kuris tikrina ar vartotojo pozicija atitinka saugumo reikalavimus, ir jei ne – inicijuoja likvidacijos logiką.
 
 Teko išmokti Rust ypatybių, kurios ypač svarbios dirbant su blockchain:
 
@@ -282,35 +280,9 @@ Toks infrastruktūros valdymas ir diegimo procesas yra būtinas norint užtikrin
 
 Dirbant su likvidacijomis ir arbitražo algoritmais neišvengiamai tenka gilintis ne tik į techninę infrastruktūrą, bet ir į pačios DeFi rinkos dinamiką. Ši rinka yra ypatinga tuo, kad viskas vyksta realiuoju laiku, be centrinio valdymo, o naudotojų elgsena ir turto vertės pokyčiai dažnai yra nulemti tiek makroekonominių veiksnių, tiek „on-chain“ paskatų.
 
-Dėl šios priežasties svarbu ne tik gebėti vykdyti arbitražo operacijas ar aptikti rizikingas paskolų pozicijas, bet ir suprasti, kaip kinta likvidumo baseinai, kaip veikia AMM (automatizuoti rinkos formuotojai), kokios rizikos kyla dėl „flash loan“ atakų, ar kaip susidaro „front-running“ situacijos. Visa tai tiesiogiai susiję su likvidacijų vykdymu, nes netikėtas rinkos paslydimas (angl. slippage) ar gas kainos šuolis gali padaryti anksčiau pelningą sandorį – nuostolingu.
+Dėl šios priežasties svarbu ne tik gebėti vykdyti arbitražo operacijas ar aptikti rizikingas paskolų pozicijas, bet ir suprasti, kaip kinta likvidumo baseinai, kaip veikia AMM (automatizuoti rinkos formuotojai), kokios rizikos kyla dėl „flash loan“ atakų, ar kaip susidaro „front-running“ situacijos.
 
 Be to, kiekvienas išmanusis kontraktas (smart contract), kurį bandoma iškviesti ar su juo sąveikauti, turi savo būseną, kas reikalauja nuolat palaikyti duomenų aktualumą. Todėl buvo būtina įdiegti realaus laiko stebėseną (angl. live monitoring), kuri leidžia tiksliai fiksuoti rinkos būsenos pokyčius blokas po bloko.
-
-\subsection{Realiojo laiko duomenų valdymo iššūkiai}
-
-Darbo metu teko susidurti su dar viena aktualia problema – kaip užtikrinti, kad sistema greitai ir tiksliai reaguotų į išorinius įvykius, tokius kaip blokų generavimas, orakulo kainų atnaujinimas ar vartotojų atliekami veiksmai grandinėje. Nors dalis šios informacijos gaunama per orakulus, kita dalis – tiesiai per RPC sąsajas, tai reikalauja labai efektyvaus ir asinchroninio architektūrinio modelio.
-
-Pritaikytas sprendimas – tai duomenų transliavimo (angl. streaming) sistema, kuri palaiko WebSocket ryšį su blokų grandinės mazgais ir leidžia gauti informaciją blokas po bloko, o ne tik periodiškai. Tai leido ne tik padidinti reakcijos greitį, bet ir sumažinti nereikalingų užklausų skaičių, kas svarbu dėl gas ir laiko sąnaudų.
-
-Taip pat buvo įdiegta lokali cache sistema, kuri leidžia išsaugoti dažniausiai naudojamą informaciją (pvz. token'ų kainas ar protokolų parametrus) atmintyje, kad būtų galima išvengti dažno kreipimosi į išorinius orakulus ar mazgus. Šie optimizaciniai sprendimai užtikrino didesnį patikimumą ir sumažino sistemos reakcijos laiką – tai ypač svarbu arbitražo ir likvidacijų operacijoms, kurios turi būti įvykdytos per kelias sekundes ar net greičiau.
-
-\subsection{Etiniai aspektai blockchain sistemose}
-
-Praktikos metu taip pat buvo keliami klausimai dėl etinių aspektų – ar arbitražas ir likvidacijos nekenkia kitiems naudotojams? Nors techniškai tai yra visiškai teisėti ir netgi protokolų skatinami veiksmai, svarbu suprasti kontekstą: likvidatoriai padeda išlaikyti sistemų stabilumą ir užtikrina, kad skolininkų rizikingos pozicijos būtų uždarytos laiku. Kita vertus, tai taip pat reikalauja labai atsakingo požiūrio – sistemą reikia suprojektuoti taip, kad nebūtų piktnaudžiavimo, pvz. vykdant likvidacijas esant netiksliai kainų informacijai.
-
-Šie klausimai tapo svarbia refleksijos dalimi – blockchain technologijos suteikia laisvę, bet ir atsakomybę. Tai buvo puiki proga ne tik pritaikyti techninius įgūdžius, bet ir permąstyti, kokią įtaką kuriama sistema turi platesniame finansinių ekosistemų kontekste.
-
-\subsection{Testavimo praktika blockchain kontekste}
-
-Vienas iš svarbiausių komponentų, siekiant sukurti patikimą sistemą blockchain aplinkoje, yra kruopštus testavimas. Kadangi kiekviena transakcija blockchain’e gali kainuoti realius pinigus (dėl „gas“ sąnaudų) ir yra negrįžtama, būtina užtikrinti, kad visas kodas elgsis tiksliai taip, kaip tikimasi. Praktikos metu teko parengti ne tik lokalius vienetinius testus, bet ir integracinius testus, kurie simuliuoja visą likvidacijos arba arbitražo procesą nuo pradžios iki pabaigos.
-
-Daug dėmesio buvo skirta testavimui atsižvelgiant į kraštines situacijas – pavyzdžiui, kas nutinka, jei kainos duomenys atkeliauja vėluodami, jei sandoris trunka ilgiau nei blokas, arba jei transakcija atmetama dėl „gas limit“ viršijimo. Tam buvo sukurti įvairūs testų scenarijai, kuriuose naudojami tiek „mock“ duomenys, tiek testnet tinkle atliekami realūs testai su ribota rizika.
-
-Taip pat buvo sukurti specialūs diagnostiniai įrankiai, leidžiantys sekti sistemos veikimą realiuoju laiku ir fiksuoti įtartinus atvejus. Pavyzdžiui, jei arbitražo transakcija nebuvo įvykdyta dėl konkurento „front-running“ veiksmo, sistema automatiškai įrašo šį įvykį į diagnostikos žurnalą. Tokie įrankiai padeda ne tik testuoti sistemą kūrimo metu, bet ir palaikyti jos kokybę veikimo laikotarpiu.
-
-Ypatingas dėmesys buvo skiriamas ir deterministiniam elgesiui – blockchain'e negalima naudoti funkcijų, kurios naudoja atsitiktinumą ar relyvuoja į neaiškią laiko informaciją. Todėl testavimo metu buvo tikrinama, ar sistema elgiasi identiškai esant tokioms pačioms pradinėms sąlygoms. Šis aspektas svarbus ne tik techninei kokybei, bet ir norint išlaikyti bendrą protokolų suderinamumą.
-
-Galiausiai, testavimas buvo neatsiejamas nuo CI/CD proceso – kiekvienas pakeitimas GitHub saugykloje automatiškai paleisdavo testų rinkinį, kuris užtikrindavo, kad joks atnaujinimas nesukels regresijų. Tai leido dirbti greitai, bet saugiai, ir garantuoti, kad sistema liks stabili net ir dažnai keičiant logiką ar strategijas.
 
 \section{Rezultatai, išvados ir pasiūlymai}
 
@@ -318,7 +290,7 @@ Galiausiai, testavimas buvo neatsiejamas nuo CI/CD proceso – kiekvienas pakeit
 
 Praktikos metu įgytos gilios žinios apie decentralizuotų paskolų protokolus, jų veikimo principus ir likvidacijų mechaniką. Buvo praktiškai suprasti tokie svarbūs DeFi pasaulio terminai kaip pozicija, skolinimosi pajėgumas, sveikumo koeficientas, likvidavimo slenkstis, uždarymo riba bei likvidacijos paskata.
 
-Be finansinių sistemų veikimo principų, taip pat įgyta techninių žinių apie programinę inžineriją debesijoje – nuo infrastruktūros valdymo su \texttt{Ansible} ir \texttt{GitHub Actions}, iki automatizuoto kodo diegimo keliuose geografiniuose serveriuose. Įgyta patirties su test–prod diegimo praktika, užtikrinančia saugią kodų integraciją.
+Be finansinių sistemų veikimo principų, taip pat įgyta techninių žinių apie programinę inžineriją debesijoje – nuo infrastruktūros valdymo su \texttt{Ansible} ir \texttt{GitHub actions}, iki automatizuoto kodo diegimo keliuose geografiniuose serveriuose. Įgyta patirties su test–prod diegimo praktika, užtikrinančia saugią kodų integraciją.
 
 Technologiniu požiūriu pagilintos Go ir Rust programavimo kalbų žinios, įsisavinti įrankiai darbui su blokų grandinės duomenimis (Web3, orakulai, RPC sąsajos). Taip pat sustiprintas supratimas apie atominį arbitražą ir jo įgyvendinimą realiose rinkose su aukštu patikimumu bei rizikos kontrole.
 
@@ -374,7 +346,6 @@ Praktikos metu buvo pasiekti šie pagrindiniai rezultatai:
     \item Integruotas likvidacijos algoritmas į esamą arbitražo sistemą, išplečiant jos funkcionalumą.
     \item Suprogramuota atskiro komponento testavimo infrastruktūra su palaikymu test serveriuose.
     \item Sukurti CI/CD workflow’ai, leidžiantys automatizuotai deploy’inti kodą į realias geografiškai paskirstytas lokacijas.
-    \item Pagerintas sistemos atsparumas rizikingoms transakcijoms per atominį arbitražo ir likvidacijų mechanizmą.
 \end{enumerate}
 
 Apskritai, praktika buvo ne tik vertinga profesiškai, bet ir leido įgyti praktinių žinių, kurių nebuvo galimybės gauti studijų metu. Dirbant realioje aukšto intensyvumo aplinkoje teko priimti sprendimus, daryti kompromisus tarp rizikos, kaštų ir pelno, taip pat suvokti kodėl architektūriniai sprendimai daromi vienu ar kitu būdu. Tai buvo puiki patirtis ruošiantis tolesnei karjerai technologijų sektoriuje.
