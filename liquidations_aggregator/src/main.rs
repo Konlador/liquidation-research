@@ -1,21 +1,22 @@
-pub use big_num::*;
-pub use db_client::*;
-use futures::stream::{self, StreamExt};
-pub use log_parsing::*;
-use std::collections::HashSet;
-use std::env;
-use std::error::Error as StdError;
-//use std::process::{Command, Stdio};
-use std::process::Stdio;
-use std::sync::Arc;
-use tokio::process::Command;
-use tokio::sync::{Mutex, Semaphore};
+use {
+    futures::stream::{self, StreamExt},
+    std::collections::HashSet,
+    std::env,
+    std::error::Error as StdError,
+    std::process::Stdio,
+    std::sync::Arc,
+    tokio::process::Command,
+    tokio::sync::{Mutex, Semaphore},
+};
 
 mod big_num;
 mod db_client;
 mod log_parsing;
 
-// Function to run the forge test and capture its output
+pub use big_num::*;
+pub use db_client::*;
+pub use log_parsing::*;
+
 async fn run_forge_test(liquidation_data: &LiquidationData) -> Result<String, Box<dyn StdError>> {
     println!("Runing test for tx {}", liquidation_data.transaction_hash);
 
@@ -42,22 +43,23 @@ async fn run_forge_test(liquidation_data: &LiquidationData) -> Result<String, Bo
         .current_dir(parent_dir) // Set the working directory to the parent
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
-        .spawn()?; // Wait for the command to finish and capture the output
+        .spawn()?;
 
     let output = cmd.wait_with_output().await?;
+    let stdout = String::from_utf8_lossy(&output.stdout).to_string();
+    let stderr = String::from_utf8_lossy(&output.stderr).to_string();
 
-    // Check the exit status
-    if !output.status.success() {
-        return Err(format!(
-            "Command failed with status: {:?}\nStandard Output: {}",
+    if output.status.success() {
+        Ok(stdout)
+    } else {
+        Err(format!(
+            "Command failed with status: {:?}\nStdout: {}\nStderr: {}",
             output.status.code(),
-            String::from_utf8_lossy(&output.stdout)
+            stdout,
+            stderr
         )
-        .into());
+        .into())
     }
-
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    Ok(stdout.to_string())
 }
 
 #[tokio::main]
@@ -77,11 +79,12 @@ async fn main() {
         liquidation_data.len(),
     );
 
-    let semaphore = Arc::new(Semaphore::new(128));
+    let parallel_workers: usize = 24;
+    let semaphore = Arc::new(Semaphore::new(parallel_workers));
     let active_blocks = Arc::new(Mutex::new(HashSet::new()));
 
     stream::iter(liquidation_data)
-        .for_each_concurrent(Some(128), |data| {
+        .for_each_concurrent(Some(parallel_workers), |data| {
             let semaphore = Arc::clone(&semaphore);
             let active_blocks = Arc::clone(&active_blocks);
             let pool_clone = pool.clone();
@@ -95,7 +98,9 @@ async fn main() {
                 };
 
                 let mut active_blocks_guard = active_blocks.lock().await;
-                if !active_blocks_guard.insert(data.block_number) {
+                if active_blocks_guard.insert(data.block_number) {
+                    drop(active_blocks_guard); // Release the lock as soon as possible
+                } else {
                     // If the block_number is already in the set, skip processing
                     println!(
                         "Skipping duplicate test for block number {}. Tx {}",
@@ -103,7 +108,6 @@ async fn main() {
                     );
                     return;
                 }
-                drop(active_blocks_guard);
 
                 let logs = match run_forge_test(&data).await {
                     Ok(logs) => logs,
@@ -112,7 +116,6 @@ async fn main() {
                             "Error running forge test for {}: {}",
                             data.transaction_hash, e
                         );
-                        //panic!("stop");
                         return;
                     }
                 };

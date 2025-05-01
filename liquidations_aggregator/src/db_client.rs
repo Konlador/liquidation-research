@@ -154,7 +154,7 @@ VALUES
 (''),-- claim xvs
 ('')
 )
-SELECT transaction_hash, block_number, v_token, borrower, repay_amount::TEXT, v_token_collateral, seize_tokens::TEXT, seize_tokens::TEXT, gas_price::TEXT
+SELECT transaction_hash, block_number, v_token, borrower, repay_amount::TEXT, v_token_collateral, seize_tokens::TEXT, gas_price::TEXT
 FROM bsc.venus_liquidations vl
 LEFT JOIN bsc.venus_liquidation_tests vlt USING(transaction_hash)
 WHERE TRUE
@@ -164,13 +164,16 @@ WHERE TRUE
     AND borrower <> '0x489a8756c18c0b8b24ec2a2b9ff3d4d447f79bec' -- bnb bridge exploiter
     AND transaction_hash NOT IN (SELECT * FROM special_txs)
     AND vlt IS NULL
-    --AND transaction_hash = '0x5f872aba28f6bbfc53628b71d6d723d8dc6c886f3c3e1e397956e779b74c62e1'
-    --AND block_number < 31302048 -- istanbul
-    AND block_number >= 31302048 AND block_number < 35490444 -- berlin
+    --AND transaction_hash = '0x7df26087237c8b87059b76c37e6ca4072fc9419024dac171f1208d05e2e2e1d6'
+    --AND transaction_hash = '0xe2a43312d11950c3188288e184809b954939025cc7c4935c062ac4ba66503253'
+    AND block_number < 31302048 -- istanbul
+    --AND block_number >= 31302048 AND block_number < 35490444 -- berlin
     --AND block_number >= 35490444 AND block_number < 39769787 -- shanghai
     --AND block_number >= 39769787 -- cancun
-    AND block_number < 32929228
-ORDER BY 2 ASC, transaction_index DESC",
+    --AND block_number < 32929228
+ORDER BY random()
+--ORDER BY 2 ASC, transaction_index DESC
+",
             &[],
         )
         .await?;
@@ -231,20 +234,23 @@ pub(crate) async fn insert_into_db(
 ) -> Result<(), Box<dyn StdError>> {
     let client = pool.get().await?;
 
-    let repeat_json = to_string(&parsed_data.repeat).unwrap();
-    let up_to_close_factor_json = to_string(&parsed_data.up_to_close_factor).unwrap();
-    let drain_json = to_string(&parsed_data.drain).unwrap();
-
     let query = format!(
         "INSERT INTO venus_liquidation_tests (
-            transaction_hash, repeat, up_to_close_factor, drain
-        ) VALUES ('{}', '{}'::jsonb, '{}'::jsonb, '{}'::jsonb)
+            transaction_hash, repeat, up_to_close_factor, drain, large_borrow, drain_same_token, largest_cf_first, smallest_cf_first
+        ) VALUES ('{}', '{}'::jsonb, '{}'::jsonb, '{}'::jsonb, '{}'::jsonb, '{}'::jsonb, '{}'::jsonb, '{}'::jsonb)
         ON CONFLICT (transaction_hash)
         DO UPDATE SET 
             repeat = EXCLUDED.repeat,
             up_to_close_factor = EXCLUDED.up_to_close_factor,
             drain = EXCLUDED.drain",
-        transaction_hash, repeat_json, up_to_close_factor_json, drain_json
+        transaction_hash,
+        to_string(&parsed_data.repeat).unwrap(),
+        to_string(&parsed_data.up_to_close_factor).unwrap(),
+        to_string(&parsed_data.drain).unwrap(),
+        to_string(&parsed_data.large_borrow).unwrap(),
+        to_string(&parsed_data.drain_same_token).unwrap(),
+        to_string(&parsed_data.largest_cf_first).unwrap(),
+        to_string(&parsed_data.smallest_cf_first).unwrap(),
     );
 
     client.execute(&query, &[]).await?;
