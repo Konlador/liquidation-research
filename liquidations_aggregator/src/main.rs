@@ -55,7 +55,7 @@ async fn run_forge_test(liquidation_data: &LiquidationData) -> Result<String, Bo
         Err(format!(
             "Command failed with status: {:?}\nStdout: {}\nStderr: {}",
             output.status.code(),
-            stdout,
+            "<no stdout>",
             stderr
         )
         .into())
@@ -79,7 +79,7 @@ async fn main() {
         liquidation_data.len(),
     );
 
-    let parallel_workers: usize = 24;
+    let parallel_workers: usize = 12;
     let semaphore = Arc::new(Semaphore::new(parallel_workers));
     let active_blocks = Arc::new(Mutex::new(HashSet::new()));
 

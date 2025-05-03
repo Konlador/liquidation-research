@@ -1,0 +1,28 @@
+# LaTeX intermediate files
+*.aux
+*.bbl
+*.blg
+*.dvi
+*.lof
+*.log
+*.out
+*.toc
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+*.run.xml
+*.bcf
+*.xdv
+
+# Files for specific editors
+.vscode/
+.idea/
+*.swp
+*.bak
+
+# LaTeX auxiliary files
+*.backup
+*.thm
+
+# Ignoring workspace or build directories
+/build/
