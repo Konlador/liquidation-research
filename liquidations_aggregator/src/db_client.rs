@@ -93,6 +93,7 @@ special_txs(transaction_hash) AS (
 VALUES
 ('0x7c97317afe5911e704bd684e8b3fe472d7b8703b54321ab564be2bbeacdb0f5f'), --36 changed config
 ('0xc81fa724698490d096b04cccb080195517f4df5cfa56121cbee895d05ad0de53'), --37 changed config
+('0xb18543cd79c90ef2ca1e463aaf3760e6e4e731b7fa64a86e6f2538de392d49df'),-- 223 changed busd CF TO 0
 ('0xfdb201f22c08b7a589a758f7836d7b01b020548420da0bc9cd6cd459f24f94ab'),-- accrue other v tokens
 ('0x951fc0819fef15e65b0141e2b79a35b128aab37ba1a1cf8fa501cfe27a16dbb3'),-- accrue other v tokens
 ('0xa6cf33bc689c354c8a7cfeea4a0144a87d34adfcb7ae2a461590e6e4549c54e3'),-- accrue other v tokens
@@ -121,58 +122,56 @@ VALUES
 ('0x143101f41381b36ba5dbc5631ddfbd4768a5729dcb992a2d1e48714154bb9ee5'),-- accrue other v tokens
 ('0x36fa16c6e77100191584a2ed69233dc146870f7ed2fc07c61e06cc782642aa19'),-- accrue other v tokens
 ('0x84efcbb93d607867a62a1b2308c61eaead13527def3641d811210e2659a60d1f'),-- accrue other v tokens
-('0xb18543cd79c90ef2ca1e463aaf3760e6e4e731b7fa64a86e6f2538de392d49df'),-- 223 CHANGE busd CF TO 0
 ('0xf3bd6a6c3a92ea0a8bc6e3e736efe2a5f8581063c21a2a52577783c1804d9d77'),-- accrue other v tokens
 ('0x87640bc97f041012ace33780ac0c138b5e1692660a17561baa7e0b90d3226704'),-- accrue other v tokens
 ('0x830b5132502a7d558869611957b73149d8e645c6ad65b3d060a73db06689c5e7'),-- broken simulation
 ('0xa517e3cf2c4d3cd6eefca063a686e424d2cae02b295dc42e51262529007a08e8'),-- takes too long
-(''),-- accrue other v tokens
-(''),-- accrue other v tokens
-('0x92d1f0c59df5bec1b498b63780071b4d828fb14e24b99eeec4f042dad78fa618'),-- claim xvs
-('0xa24a5ea2084499e472260c50e5e79bbe375265c9f60fdf5885fb97676db178b1'),-- claim xvs
-('0xfbe3aa2fb537cb1e41a8be2d30f5131752b27d3df282d6b6a684d3ad8ced6b4f'),-- claim xvs
-('0xd47b29d65ce9f9035f976486feef588eb8a6a052b067c001a709eb1b4d2a98ac'),-- claim xvs
-('0x05765bb515cd90f523bc2e87427d07c40e4c25f594b5b0086980a461d0baa308'),-- claim xvs
-('0x6c34de7bfa3cc43b18640932ff5e9212e1075fe36ff043593747637f97635d23'),-- claim xvs
-('0x6c34de7bfa3cc43b18640932ff5e9212e1075fe36ff043593747637f97635d23'),-- claim xvs
-('0x801001726f7c0c2434a8ea1680213ebfd5201094087c94d7dac44b7860555f1c'),-- claim xvs
-('0x211b0a07e5804e27bb84f17f662ca6b00ab8a8df70277236a179a63b190d7c02'),-- claim xvs
-('0x5277c7dd83bfeb258f9bdb809989cb95eaf4170115e23b9cd6af590f4e9b6b14'),-- claim xvs
-('0xbb198dec733c669696081d7785ca63bd5e959d70fe954754987829faddbc457f'),-- claim xvs
-('0x779c09e57e678c8462c3c73fade305dca5dfbbcb76a2d62bf496155b445d2480'),-- claim xvs
-('0xbf201d382496d56a563e9e88f2fa0bda9afe0f939ac31a54856c140d3e2e6947'),-- claim xvs
-('0x44cda940f0834d9996726876a1f2a540fe876c48b547596e32cc2fcf6f10e645'),-- claim xvs
-('0x703db59c4d471bb2b12c1416245d42ed846759c0fe2cc9235fe3e29454462e67'),-- claim xvs
-('0x9f76985b8a42795c4b8ea0ae3e7ff7c1286c329b1571df5a05f573d6466f1129'),-- claim xvs
-('0x362fcb1947ca7f21b2cb01ef6e307b271f2bc7b044253bfaca864e172905a0f2'),-- claim xvs
-('0x0aefc5c5770cc301a571eadbdce07623f1d58620757dd80743bdd5db76361d7c'),-- claim xvs
-('0x40310334862593d5930026623cd47ac475af98478089d8711f38542b1c64968c'),-- claim xvs
-(''),-- claim xvs
-(''),-- claim xvs
-(''),-- claim xvs
-(''),-- claim xvs
-(''),-- claim xvs
+--('0x92d1f0c59df5bec1b498b63780071b4d828fb14e24b99eeec4f042dad78fa618'),-- claim xvs
+--('0xa24a5ea2084499e472260c50e5e79bbe375265c9f60fdf5885fb97676db178b1'),-- claim xvs
+--('0xfbe3aa2fb537cb1e41a8be2d30f5131752b27d3df282d6b6a684d3ad8ced6b4f'),-- claim xvs
+--('0xd47b29d65ce9f9035f976486feef588eb8a6a052b067c001a709eb1b4d2a98ac'),-- claim xvs
+--('0x05765bb515cd90f523bc2e87427d07c40e4c25f594b5b0086980a461d0baa308'),-- claim xvs
+--('0x6c34de7bfa3cc43b18640932ff5e9212e1075fe36ff043593747637f97635d23'),-- claim xvs
+--('0x6c34de7bfa3cc43b18640932ff5e9212e1075fe36ff043593747637f97635d23'),-- claim xvs
+--('0x801001726f7c0c2434a8ea1680213ebfd5201094087c94d7dac44b7860555f1c'),-- claim xvs
+--('0x211b0a07e5804e27bb84f17f662ca6b00ab8a8df70277236a179a63b190d7c02'),-- claim xvs
+--('0x5277c7dd83bfeb258f9bdb809989cb95eaf4170115e23b9cd6af590f4e9b6b14'),-- claim xvs
+--('0xbb198dec733c669696081d7785ca63bd5e959d70fe954754987829faddbc457f'),-- claim xvs
+--('0x779c09e57e678c8462c3c73fade305dca5dfbbcb76a2d62bf496155b445d2480'),-- claim xvs
+--('0xbf201d382496d56a563e9e88f2fa0bda9afe0f939ac31a54856c140d3e2e6947'),-- claim xvs
+--('0x44cda940f0834d9996726876a1f2a540fe876c48b547596e32cc2fcf6f10e645'),-- claim xvs
+--('0x703db59c4d471bb2b12c1416245d42ed846759c0fe2cc9235fe3e29454462e67'),-- claim xvs
+--('0x9f76985b8a42795c4b8ea0ae3e7ff7c1286c329b1571df5a05f573d6466f1129'),-- claim xvs
+--('0x362fcb1947ca7f21b2cb01ef6e307b271f2bc7b044253bfaca864e172905a0f2'),-- claim xvs
+--('0x0aefc5c5770cc301a571eadbdce07623f1d58620757dd80743bdd5db76361d7c'),-- claim xvs
+--('0x40310334862593d5930026623cd47ac475af98478089d8711f38542b1c64968c'),-- claim xvs
 ('')
-)
-SELECT transaction_hash, block_number, v_token, borrower, repay_amount::TEXT, v_token_collateral, seize_tokens::TEXT, gas_price::TEXT
-FROM bsc.venus_liquidations vl
-LEFT JOIN bsc.venus_liquidation_tests vlt USING(transaction_hash)
+),
+liquidations_to_test AS (
+SELECT transaction_hash, block_number, v_token, borrower, repay_amount::TEXT, v_token_collateral, seize_tokens::TEXT, gas_price::TEXT,
+        ROW_NUMBER() OVER (PARTITION BY borrower ORDER BY block_number ASC, transaction_index ASC) AS row_num, vlt IS NOT NULL AS is_tested
+FROM
+    bsc.venus_liquidations vl
+    LEFT JOIN bsc.venus_liquidation_tests vlt USING(transaction_hash)
 WHERE TRUE
-    AND v_token IN (SELECT * FROM venus_core_v_tokens)
-    AND (block_number >= 31302048 OR v_token_collateral <> '0x151b1e2635a717bcdc836ecd6fbb62b674fe3e1d') -- not handling istanbul xvs collaterals because the claim venus rewards
-    --AND v_token <> '0x95c78222b3d6e262426483d42cfa53685a67ab9d' -- NOT vbusd
+    --AND vlt IS NULL -- not tested
+    AND v_token IN (SELECT * FROM venus_core_v_tokens) -- the repay vtoken is from venus protocol
+    AND transaction_hash NOT IN (SELECT * FROM special_txs) -- not in manual ban list
+    --AND (block_number >= 31302048 OR v_token_collateral <> '0x151b1e2635a717bcdc836ecd6fbb62b674fe3e1d') -- not handling istanbul xvs collaterals because the claim venus rewards
+    --AND v_token <> '0x95c78222b3d6e262426483d42cfa53685a67ab9d' -- not vbusd
     AND borrower <> '0x489a8756c18c0b8b24ec2a2b9ff3d4d447f79bec' -- bnb bridge exploiter
-    AND transaction_hash NOT IN (SELECT * FROM special_txs)
-    AND vlt IS NULL
-    --AND transaction_hash = '0x7df26087237c8b87059b76c37e6ca4072fc9419024dac171f1208d05e2e2e1d6'
-    --AND transaction_hash = '0xe2a43312d11950c3188288e184809b954939025cc7c4935c062ac4ba66503253'
     AND block_number < 31302048 -- istanbul
     --AND block_number >= 31302048 AND block_number < 35490444 -- berlin
     --AND block_number >= 35490444 AND block_number < 39769787 -- shanghai
     --AND block_number >= 39769787 -- cancun
     --AND block_number < 32929228
+    AND v_token_collateral <> '0x151b1e2635a717bcdc836ecd6fbb62b674fe3e1d' -- not handling xvs collateral because claim venus rewards
 ORDER BY random()
---ORDER BY 2 ASC, transaction_index DESC
+)
+SELECT * 
+FROM liquidations_to_test
+WHERE row_num = 1
+AND is_tested = false
 ",
             &[],
         )

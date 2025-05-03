@@ -81,8 +81,19 @@ contract LiquidationTest is Test, ExponentialNoError {
         // }
 
         // #1 Repeat
-        repeatLiquidation(borrower, repayVToken, collateralVToken, repayAmount, expectedSeize);
+        bool needToClaimXvs = repeatLiquidation(borrower, repayVToken, collateralVToken, repayAmount, expectedSeize);
         vm.revertTo(freshSnapshotId);
+
+        if (needToClaimXvs) {
+            // claim xvs
+            freshSnapshotId = vm.snapshot();
+
+            address[] memory holders = new address[](1);
+            holders[0] = borrower;
+            address[] memory vtokens = new address[](1);
+            vtokens[0] = address(repayVToken);
+            comptroller.claimVenus(holders, vtokens, true, false, true);
+        }
 
         // #2 Up to close factor
         upToCloseFactorLiquidation(borrower, repayVToken, collateralVToken);
@@ -227,6 +238,12 @@ contract LiquidationTest is Test, ExponentialNoError {
         console.log("strategyRunReport end");
     }
 
+    struct RepeatLiquidationVars {
+        AssetData repayAsset;
+        AssetData collateralAsset;
+        uint256 collateralUnderlyingGained;
+    }
+
     function repeatLiquidation(
         address borrower,
         VTokenInterface repayVToken,
@@ -235,43 +252,69 @@ contract LiquidationTest is Test, ExponentialNoError {
         uint256 expectedSeize
     )
         private
+        returns (bool needToClaimXvs)
     {
         console.log("");
         console.log("Tests case: repeatLiquidation");
         StrategyRunReport storage report = startStrategy("repeatLiquidation", borrower);
 
-        (AssetData memory repayAsset,) = getAsset(borrower, repayVToken);
-        (AssetData memory collateralAsset,) = getAsset(borrower, collateralVToken);
-        AssetData[] memory assets;
-        if (repayVToken == collateralVToken) {
-            assets = new AssetData[](1);
-            assets[0] = repayAsset;
-        } else {
-            assets = new AssetData[](2);
-            assets[0] = repayAsset;
-            assets[1] = collateralAsset;
+        RepeatLiquidationVars memory vars;
+        (vars.repayAsset,) = getAsset(borrower, repayVToken);
+        (vars.collateralAsset,) = getAsset(borrower, collateralVToken);
+
+        {
+            AssetData[] memory assets;
+            if (repayVToken == collateralVToken) {
+                assets = new AssetData[](1);
+                assets[0] = vars.repayAsset;
+            } else {
+                assets = new AssetData[](2);
+                assets[0] = vars.repayAsset;
+                assets[1] = vars.collateralAsset;
+            }
+            storeAssets(report, assets);
         }
-        storeAssets(report, assets);
 
         dealAndMaybeApproveRepayToken(borrower, repayVToken, report);
-        (uint256 collateralVTokenGained, uint256 gasUsed) =
-            callLiquidate(borrower, repayVToken, collateralVToken, repayAmount);
+        uint256 snapshot = vm.snapshot();
+        (uint256 errorCode, uint256 collateralVTokenGained, uint256 gasUsed) =
+            callLiquidateWithResult(borrower, repayVToken, collateralVToken, repayAmount);
+        if (errorCode != 0) {
+            if (collateralVToken != VTokenInterface(0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D)) {
+                revert("Liquidation failed");
+            }
+            // Try to claim xvs and do the liquidation again
+            vm.revertTo(snapshot);
+
+            // Claim xvs
+            {
+                address[] memory holders = new address[](1);
+                holders[0] = borrower;
+                address[] memory vtokens = new address[](1);
+                vtokens[0] = address(repayVToken);
+                comptroller.claimVenus(holders, vtokens, true, false, true);
+            }
+
+            // Do the liquidation
+            (collateralVTokenGained, gasUsed) = callLiquidate(borrower, repayVToken, collateralVToken, repayAmount);
+            needToClaimXvs = true;
+        }
         assertEq(collateralVTokenGained, expectedSeize, "expected seize does not match");
 
-        uint256 collateralUnderlyingGained = simulateRedeem(collateralVToken, collateralVTokenGained);
+        vars.collateralUnderlyingGained = simulateRedeem(collateralVToken, collateralVTokenGained);
         report.liquidations.push(
             LiquidationReport({
-                repaySymbol: repayAsset.symbol,
-                repayVToken: repayAsset.vtoken,
-                collateralSymbol: collateralAsset.symbol,
-                collateralVToken: collateralAsset.vtoken,
+                repaySymbol: vars.repayAsset.symbol,
+                repayVToken: vars.repayAsset.vtoken,
+                collateralSymbol: vars.collateralAsset.symbol,
+                collateralVToken: vars.collateralAsset.vtoken,
                 repayAmount: repayAmount,
                 collateralVTokenGained: collateralVTokenGained,
-                collateralUnderlyingGained: collateralUnderlyingGained,
+                collateralUnderlyingGained: vars.collateralUnderlyingGained,
                 gasUsed: gasUsed,
                 postHealthFactor: getHealthFactor(borrower),
-                repaidUsd: repayAmount * repayAsset.price / 1e18,
-                seizedUsd: collateralUnderlyingGained * collateralAsset.price / 1e18
+                repaidUsd: repayAmount * vars.repayAsset.price / 1e18,
+                seizedUsd: vars.collateralUnderlyingGained * vars.collateralAsset.price / 1e18
             })
         );
 
@@ -1678,7 +1721,7 @@ contract LiquidationTest is Test, ExponentialNoError {
         uint256 errorCode;
         (errorCode, collateralVTokenGained, gasUsed) =
             callLiquidateWithResult(borrower, repayVToken, collateralVToken, repayAmount);
-        require(errorCode == 0, "Liquidation failed");
+        assertEq(errorCode, 0, "Liquidation failed");
     }
 
     function callLiquidateExpectFail(

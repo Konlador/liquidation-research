@@ -150,6 +150,16 @@ abstract contract ComptrollerInterface {
 
     function claimVenus(address) external virtual;
 
+    function claimVenus(
+        address[] memory holders,
+        address[] memory vTokens,
+        bool borrowers,
+        bool suppliers,
+        bool collateral
+    )
+        external
+        virtual;
+
     function venusAccrued(address) external view virtual returns (uint256);
 
     function venusSupplySpeeds(address) external view virtual returns (uint256);
