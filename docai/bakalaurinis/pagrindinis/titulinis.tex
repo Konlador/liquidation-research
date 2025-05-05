@@ -24,24 +24,15 @@
 \end{center}
 \vskip 80pt
 
-\centering{\Large \@autorius}
-\@ifundefined{@antrasautorius}{}
-{
-\vskip 10pt
-\centering{\Large \@antrasautorius}
-}
 \vskip 20pt
 
 \centering{
     \begin{tabular}{rcp{.7\textwidth}}
+        {\Large Atliko} & {\Large :} & {\Large \@autorius}\\[10pt]
         {\Large Darbo vadovas} & {\Large :} & {\Large \@vadovas}\\[10pt]
-        \@ifundefined{@moksliniskonsultantas}{}
-            {
-                {\Large Mokslinis konsultantas} & {\Large :} & {\Large \@moksliniskonsultantas}\\[10pt]
-            }
         \@ifundefined{@recenzentas}{}
             {
-                {\Large Recenzentas} & {\Large :} & {\Large \@recenzentas}\\[10pt]
+                {\Large Darbo recenzentas} & {\Large :} & {\Large \@recenzentas}\\[10pt]
             }
     \end{tabular}}
 
