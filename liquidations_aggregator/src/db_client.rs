@@ -154,23 +154,23 @@ FROM
     bsc.venus_liquidations vl
     LEFT JOIN bsc.venus_liquidation_tests vlt USING(transaction_hash)
 WHERE TRUE
-    --AND vlt IS NULL -- not tested
     AND v_token IN (SELECT * FROM venus_core_v_tokens) -- the repay vtoken is from venus protocol
     AND transaction_hash NOT IN (SELECT * FROM special_txs) -- not in manual ban list
     --AND (block_number >= 31302048 OR v_token_collateral <> '0x151b1e2635a717bcdc836ecd6fbb62b674fe3e1d') -- not handling istanbul xvs collaterals because the claim venus rewards
-    --AND v_token <> '0x95c78222b3d6e262426483d42cfa53685a67ab9d' -- not vbusd
+    AND v_token <> '0x95c78222b3d6e262426483d42cfa53685a67ab9d' -- not vbusd
     AND borrower <> '0x489a8756c18c0b8b24ec2a2b9ff3d4d447f79bec' -- bnb bridge exploiter
-    AND block_number < 31302048 -- istanbul
+    --AND block_number < 31302048 -- istanbul
     --AND block_number >= 31302048 AND block_number < 35490444 -- berlin
     --AND block_number >= 35490444 AND block_number < 39769787 -- shanghai
-    --AND block_number >= 39769787 -- cancun
+    AND block_number >= 39769787 -- cancun
     --AND block_number < 32929228
-    AND v_token_collateral <> '0x151b1e2635a717bcdc836ecd6fbb62b674fe3e1d' -- not handling xvs collateral because claim venus rewards
+    --AND v_token_collateral <> '0x151b1e2635a717bcdc836ecd6fbb62b674fe3e1d' -- not handling xvs collateral because claim venus rewards
 ORDER BY random()
 )
 SELECT * 
 FROM liquidations_to_test
-WHERE row_num = 1
+WHERE TRUE
+AND row_num = 1
 AND is_tested = false
 ",
             &[],

@@ -47,11 +47,11 @@ contract LiquidationTest is Test, ExponentialNoError {
         // Important, because the default is the previous block metadata
         vm.roll(block.number + 1);
         vm.warp(nextBlockTime);
-        assertTrue(block.number < 31_302_048, "not in istanbul");
-        //assertTrue(block.number >= 31_302_048 && block.timestamp < 1_705_996_800, "not in berlin");
+        // assertTrue(block.number < 31_302_048, "not in istanbul");
+        // assertTrue(block.number >= 31_302_048 && block.timestamp < 1_705_996_800, "not in berlin");
         // shanghai from 35490444 block
         // assertTrue(block.timestamp >= 1_705_996_800 && block.timestamp < 1_718_863_500, "not in shanghai");
-        // assertTrue(block.timestamp >= 1_718_863_500, "not in cancun"); // 39769787 block
+        assertTrue(block.timestamp >= 1_718_863_500, "not in cancun"); // 39769787 block
 
         // VTokenInterface(0x882C173bC7Ff3b7786CA16dfeD3DFFfb9Ee7847B).accrueInterest();
         // VTokenInterface(0x95c78222B3D6e262426483D42CfA53685A67Ab9D).accrueInterest();
@@ -1013,8 +1013,10 @@ contract LiquidationTest is Test, ExponentialNoError {
 
             bytes4 SELECTOR = bytes4(keccak256(bytes("getVAIRepayAmount(address)")));
             (bool success, bytes memory data) = address(vaiController).call(abi.encodeWithSelector(SELECTOR, account));
-            if (success && data.length > 0) {
-                console.log("data length returned", data.length);
+            if (success && data.length != 0 && data.length != 32) {
+                revert("watch this (3)");
+            }
+            if (success && data.length == 32) {
                 vaiDebt = abi.decode(data, (uint256));
             }
 
@@ -1025,7 +1027,6 @@ contract LiquidationTest is Test, ExponentialNoError {
             // }
 
             if (vaiDebt > 0) {
-                revert("watch this (2)");
                 vars.sumBorrowPlusEffects = add_(vars.sumBorrowPlusEffects, vaiDebt);
             }
         }

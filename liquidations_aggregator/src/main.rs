@@ -12,10 +12,12 @@ use {
 mod big_num;
 mod db_client;
 mod log_parsing;
+mod memory;
 
 pub use big_num::*;
 pub use db_client::*;
 pub use log_parsing::*;
+pub use memory::*;
 
 async fn run_forge_test(liquidation_data: &LiquidationData) -> Result<String, Box<dyn StdError>> {
     println!("Runing test for tx {}", liquidation_data.transaction_hash);
@@ -27,7 +29,7 @@ async fn run_forge_test(liquidation_data: &LiquidationData) -> Result<String, Bo
         .ok_or("Failed to get parent directory")?;
 
     // Execute the command in the parent directory and wait for it to complete
-    let cmd = Command::new("forge")
+    let mut cmd = Command::new("forge")
         .arg("test")
         .arg("--no-rpc-rate-limit")
         .arg("--match-test")
@@ -44,6 +46,85 @@ async fn run_forge_test(liquidation_data: &LiquidationData) -> Result<String, Bo
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()?;
+
+    // Monitor memory usage
+    let pid = cmd.id().expect("Failed to get child PID");
+    let mut sys = sysinfo::System::new();
+    // let mem_check = tokio::spawn(async move {
+
+    // });
+
+    loop {
+        tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+
+        // if is_memory_under_pressure().await.unwrap_or(false) {
+        //     eprintln!("System under memory pressure (pageouts detected). Killing child.");
+        //     let _ = cmd.kill().await;
+        //     break;
+        // }
+
+        let child_status = cmd.try_wait();
+        if let Ok(None) = child_status {
+            // println!("Child did not finish yet {}", pid);
+            sys.refresh_process(sysinfo::Pid::from_u32(pid));
+            if let Some(proc) = sys.process(sysinfo::Pid::from_u32(pid)) {
+                let memory_bytes = proc.memory();
+                // println!("Child memory usage {}", memory_bytes);
+                if memory_bytes > 10 * 1024 * 1024 * 1024 {
+                    eprintln!(
+                        "Killing child process {} due to memory > 10GB ({})",
+                        pid, memory_bytes
+                    );
+                    let _ = cmd.kill().await;
+                    break;
+                }
+            } else {
+                break; // process exited
+            }
+
+            continue;
+        } else {
+            break;
+        }
+    }
+
+    //     let output = {
+    //         use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
+
+    // use std::ffi::OsStr;
+    // use std::future::Future;
+    // use std::io;
+    // use std::path::Path;
+    // use std::pin::Pin;
+    // use std::process::{Command as StdCommand, ExitStatus, Output, Stdio};
+    // use std::task::{ready, Context, Poll};
+
+    //         async fn read_to_end<A: AsyncRead + Unpin>(io: &mut Option<A>) -> io::Result<Vec<u8>> {
+    //             let mut vec = Vec::new();
+    //             if let Some(io) = io.as_mut() {
+    //                 tokio::io::util::read_to_end(io, &mut vec).await?;
+    //             }
+    //             Ok(vec)
+    //         }
+
+    //         let mut stdout_pipe = cmd.stdout.take();
+    //         let mut stderr_pipe = cmd.stderr.take();
+
+    //         let stdout_fut = read_to_end(&mut stdout_pipe);
+    //         let stderr_fut = read_to_end(&mut stderr_pipe);
+
+    //         let (status, stdout, stderr) = try_join3(self.wait(), stdout_fut, stderr_fut).await?;
+
+    //         // Drop happens after `try_join` due to <https://github.com/tokio-rs/tokio/issues/4309>
+    //         drop(stdout_pipe);
+    //         drop(stderr_pipe);
+
+    //         Ok(Output {
+    //             status,
+    //             stdout,
+    //             stderr,
+    //         })
+    //     }
 
     let output = cmd.wait_with_output().await?;
     let stdout = String::from_utf8_lossy(&output.stdout).to_string();
@@ -89,6 +170,9 @@ async fn main() {
             let active_blocks = Arc::clone(&active_blocks);
             let pool_clone = pool.clone();
             async move {
+                // Wait if memory is above threshold
+                wait_if_memory_high(30).await;
+
                 let _permit = match semaphore.acquire().await {
                     Ok(permit) => permit,
                     Err(e) => {

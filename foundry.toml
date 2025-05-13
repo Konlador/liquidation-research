@@ -3,7 +3,7 @@
 [profile.default]
 auto_detect_solc = true
 bytecode_hash = "none"
-evm_version = "istanbul"       # istanbul, berlin, shanghai, cancun
+evm_version = "shanghai"       # istanbul, berlin, shanghai, cancun
 fuzz = { runs = 1_000 }
 gas_reports = ["*"]
 optimizer = true

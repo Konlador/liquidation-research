@@ -118,7 +118,7 @@ pub fn parse_strategy_run_report(lines: Vec<String>) -> StrategyRunReport {
 
     let mut parsing_strategy = false;
 
-    for line in &lines {
+    for line in lines.iter() {
         if line.starts_with("strategyRunReport start") {
             parsing_strategy = true;
         } else if line.starts_with("strategyRunReport end") {
@@ -292,11 +292,11 @@ pub fn parse_strategy_run_report(lines: Vec<String>) -> StrategyRunReport {
 pub fn parse_logs(logs: &str) -> LiquidationTestResults {
     let mut test_case_map: HashMap<String, Vec<String>> = HashMap::new();
 
-    let lines: Vec<&str> = logs.lines().collect();
+    let lines = logs.lines();
     let mut current_test: Option<String> = None;
     let mut current_raw_lines: Vec<String> = Vec::new();
 
-    for &line in &lines {
+    for line in lines {
         let line = line.trim_start(); // Remove leading whitespace
 
         if line.starts_with("Tests case: ") {
