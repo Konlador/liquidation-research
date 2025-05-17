@@ -160,7 +160,7 @@ async fn main() {
         liquidation_data.len(),
     );
 
-    let parallel_workers: usize = 12;
+    let parallel_workers: usize = 16;
     let semaphore = Arc::new(Semaphore::new(parallel_workers));
     let active_blocks = Arc::new(Mutex::new(HashSet::new()));
 
