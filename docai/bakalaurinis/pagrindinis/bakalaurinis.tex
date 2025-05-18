@@ -379,9 +379,36 @@ Jeigu likvidatorius siekia vykdyti arbitražą, jis taip pat turi įvertinti kai
 % Šiame darbe dėl paprastumo daroma prielaida, kad gražinamą valiutą arba užstatą galima gauti ar iškeista orakulo kainomis. PAAISKINTI KODEL TAIP MUMS SAUGU.
 
 \subsection{Panašumai su kitais protokolais}
-\textcolor{red}{
-Parodome, kad panašūs dalykai egzistuoja ir Aave’e, ir kituose didžiuosiuose protokoluose, tokiuose kaip Compound.
-}
+
+Nors šiame darbe pagrindinis dėmesys skiriamas \textit{Venus} protokolo likvidavimo mechanizmo analizei, būtina pažymėti, kad šis mechanizmas yra itin panašus į kitų reikšmingų decentralizuotų skolinimo protokolų, tokių kaip \textit{Aave} ir \textit{Compound}, veikimą. Dėl šios priežasties \textit{Venus} galima laikyti reprezentatyviu DeFi skolinimo sistemų atveju, o šiame darbe siūlomos strategijos gali būti aktualios ir taikomos kitų protokolų kontekste.
+
+\textit{Venus} buvo sukurtas kaip \textit{Compound} bei \textit{MakerDAO} protokolų forkas, sujungiant jų funkcionalumą į vieną bendrą sistemą \cite{whatisvenus}. Nors \textit{MakerDAO} daugiausiai orientuojasi į stabilios valiutos (DAI) išleidimą, \textit{Compound} pasižymi išplėtota skolinimo infrastruktūra, kurią \textit{Venus} ir perėmė.
+
+\textit{Compound} protokolas turi tris pagrindines versijas: V1, V2 ir V3. Versija V2, pristatyta 2019 m. gegužę \cite{compound2launch}, įvedė reikšmingus architektūrinius pokyčius, tarp jų – atskirus rinkos kontraktus kiekvienai valiutai bei cToken mechanizmą, leidžiantį naudotojams uždirbti palūkanas bei naudoti savo turtą kaip užstatą. Šios V2 versijos savybės yra esminės \textit{Venus} protokolo struktūrai. Be to, remiantis DeFiLlama duomenimis, \textit{Venus} oficialiai priskiriamas \textit{Compound V2} forkų grupei, o tai papildomai patvirtina architektūrinį paveldimumą \cite{venuscompoundfork}.
+
+% V3 versija (dar vadinama Comet) ženkliai skiriasi nuo ankstesnių ir nuo Venus protokolo.
+
+\paragraph{Struktūriniai panašumai} Toliau apžvelgiami pagrindiniai veikimo aspektai, kuriuose \textit{Venus}, \textit{Compound} (V2) ir \textit{Aave} pasižymi esminiais panašumais:
+
+\begin{itemize}
+    \item \textbf{Pozicijų struktūra.} Visuose minėtuose protokoluose naudotojo pozicija sudaryta iš paskolų ir užstatų, suskirstytų pagal konkrečias valiutas. Bendras pozicijos sveikumo koeficientas (angl. \textit{Health Factor}) skaičiuojamas pagal visų paskolos ir užstato komponentų santykį, atsižvelgiant į kiekvienos valiutos užstato koeficientą. Tokia formulė taikoma tiek \textit{Aave}, tiek \textit{Compound}, tiek \textit{Venus} sistemose \cite{aave-risks, compound-positionstructure}.
+
+    \item \textbf{Uždarymo riba (angl. \textit{Close Factor}).} Visi trys protokolai riboja vienos likvidacijos metu grąžinamos paskolos dalį. \textit{Venus} ir \textit{Compound} V2 naudoja 50\% fiksuotą ribą \cite{compound-closefactor}, o \textit{Aave} leidžia šią reikšmę konfigūruoti intervale nuo 50\% iki 100\%, priklausomai nuo paskolos rizikos parametrų \cite{aave-liquidation}.
+
+    \item \textbf{Likvidacijos poromis.} Visuose aptariamuose protokoluose likvidavimas vykdomas poromis – t. y., likvidatorius pasirenka konkrečią skolos valiutą, kurią grąžina, ir užstato valiutą, kurią atsiima. Likvidacija nevykdoma visos pozicijos mastu, bet yra realizuojama per konkrečias skolos–užstato valiutų poras \cite{compound-liquidation, aave-liquidation}.
+\end{itemize}
+
+\paragraph{Skirtumai} Nepaisant reikšmingų panašumų, tam tikri struktūriniai skirtumai tarp šių protokolų visgi egzistuoja:
+
+\begin{itemize}
+    \item \textbf{Likvidacijos paskata.} \textit{Venus} protokole likvidacijos paskata (angl. \textit{liquidation incentive}) yra fiksuota visoms valiutoms ir siekia 10\%. Tuo tarpu \textit{Aave} ir \textit{Compound} leidžia šią paskatą konfigūruoti atskirai kiekvienai užstato valiutai, kas suteikia daugiau lankstumo rizikos valdymo požiūriu \cite{compound-incentive, aave-liquidation}.
+
+    \item \textbf{Skirtingi užstato koeficientai.} \textit{Aave} protokole užstato koeficientai skolinimuisi ir likvidacijai gali skirtis – vadinamasis \textit{liquidation threshold} dažnai būna didesnis už skolinimosi limitą. Toks sprendimas leidžia apsaugoti protokolą ir naudotojus, sukuriant papildomą „apsauginį buferį“ nuo nedidelių kainos svyravimų.
+\end{itemize}
+
+\paragraph{Apibendrinimas}
+
+Atsižvelgiant į šiuos aspektus, galima teigti, kad \textit{Venus} protokolo architektūra yra labai artima \textit{Compound V2} modelio įgyvendinimui, tuo pačiu perimdama ir tam tikrus \textit{Aave} veikimo principus. Dėl šios priežasties \textit{Venus} gali būti laikomas reprezentatyviu decentralizuotų paskolų platformų pavyzdžiu, o šiame darbe taikomos ir analizuojamos strategijos – aktualios ir kitiems populiariems protokolams, taikantiems analogiškus likvidavimo principus.
 
 \section{Skirtingos likvidacijų strategijos}
 \label{sec:liq_strategijos}
@@ -796,20 +823,20 @@ DOGE &  2 617 497   &  5 822 673       & 40\% & 0,889 \\ \hline
   \label{tab:drain_same_token_profit_most}
   \end{table}
 
-\subsubsection{Kitas atvejis}
-% SELECT
-% (large_borrow ->>'profit_usd')::NUMERIC AS largest_loan_profit,
-% (drain_same_token->>'profit_usd')::NUMERIC AS same_token_profit,
-% transaction_hash, drain_same_token, created_at
-% FROM bsc.venus_liquidation_tests
-% WHERE TRUE
-% AND (drain_same_token->>'profit_usd')::NUMERIC > 10000
-% AND (large_borrow ->>'profit_usd')::NUMERIC  > 0
-% ORDER BY (drain_same_token->>'profit_usd')::NUMERIC / (large_borrow ->>'profit_usd')::NUMERIC  DESC
+% \subsubsection{Kitas atvejis}
+% % SELECT
+% % (large_borrow ->>'profit_usd')::NUMERIC AS largest_loan_profit,
+% % (drain_same_token->>'profit_usd')::NUMERIC AS same_token_profit,
+% % transaction_hash, drain_same_token, created_at
+% % FROM bsc.venus_liquidation_tests
+% % WHERE TRUE
+% % AND (drain_same_token->>'profit_usd')::NUMERIC > 10000
+% % AND (large_borrow ->>'profit_usd')::NUMERIC  > 0
+% % ORDER BY (drain_same_token->>'profit_usd')::NUMERIC / (large_borrow ->>'profit_usd')::NUMERIC  DESC
 
-% SELECT * FROM bsc.venus_liquidation_tests
-% WHERE transaction_hash = '0x67cc58e0d8e2ddd8eea396fb3e667bf4ba295541b1d8d3d2ee600529a1f26138'
-% ORDER BY created_at desc
+% % SELECT * FROM bsc.venus_liquidation_tests
+% % WHERE transaction_hash = '0x67cc58e0d8e2ddd8eea396fb3e667bf4ba295541b1d8d3d2ee600529a1f26138'
+% % ORDER BY created_at desc
 
 % \begin{table}[H]
 % \centering
@@ -817,10 +844,19 @@ DOGE &  2 617 497   &  5 822 673       & 40\% & 0,889 \\ \hline
 % \label{tab:drain_same_token_position_ratio}
 % \begin{tabular}{|c|c|c|c|c|}
 % \hline
-% \textbf{Valiuta} & \textbf{Skola (\$)} & \textbf{Užstatas (\$)} & \textbf{CF} & \textbf{HF} \\ \hline
-% DOGE &  2 617 497   &  5 822 673       & 40\% & 0,889 \\ \hline
+% \textbf{Valiuta} & \textbf{Skola (\$)} & \textbf{Užstatas (\$)}  \\ \hline
+% ETH  &  0        &  235\,783 \\ \hline
+% USDC &  199\,502 &  200\,153 \\ \hline
+% BNB  &  0        &  99\,184  \\ \hline
+% XVS  &  0        &  19\,109  \\ \hline
+% BUSD &  0        &  0,06     \\ \hline
+% DAI  &  151\,329 &  0        \\ \hline
+% USDT &  109\,419 &  0        \\ \hline
+% FIL  &  47       &  0        \\ \hline
 % \end{tabular}
 % \end{table}
+
+% Nupiesiame pelno lentele, parodome, kad 
 
 \subsubsection{Bendras pelnas}
 % SELECT count(*) AS total_liquidations,
@@ -1329,7 +1365,7 @@ Taip pat, nebuvo analizuojamos likvidacijos, kurios išnaudojo \textit{Venus} pr
     Detaliau, kas turi būti parašyta šiame skyriuje, rasite atitinkamos programos metodiniuose reikalavimuose.  
 }
 
-% \printbibliography[title = {Šaltiniai}]
+\printbibliography[title = {Šaltiniai}]
 
 
 % \appendix
