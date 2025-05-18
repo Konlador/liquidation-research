@@ -72,11 +72,11 @@ async fn run_forge_test(liquidation_data: &LiquidationData) -> Result<String, Bo
                 // println!("Child memory usage {}", memory_bytes);
                 if memory_bytes > 10 * 1024 * 1024 * 1024 {
                     eprintln!(
-                        "Killing child process {} due to memory > 10GB ({})",
+                        "(NOT) Killing child process {} due to memory > 10GB ({})",
                         pid, memory_bytes
                     );
-                    let _ = cmd.kill().await;
-                    break;
+                    // let _ = cmd.kill().await;
+                    // break;
                 }
             } else {
                 break; // process exited

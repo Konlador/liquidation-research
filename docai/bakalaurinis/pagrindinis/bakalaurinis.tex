@@ -391,9 +391,9 @@ Parodome, kad panašūs dalykai egzistuoja ir Aave’e, ir kituose didžiuosiuos
 \subsection{Naivus algoritmas}
 \label{sec:largest_borrow}
 
-Paprasta likvidavimo algoritmo idėja gali būti tokia: turint likviduojamo skolininko poziciją, pasirenkama paskolos valiuta, kuriai skolininkas turi didžiausią įsipareigojimą, ir užstato valiuta, kurios vertė skolininko pozicijoje yra didžiausia. Tuomet stengiamasi grąžinti tiek, kiek leidžia uždarymo riba (paprastai – pusę pasiskolintos valiutos vertės), arba tiek, kad būtų išnaudotas visas skolininko užstatas pasirinkta valiuta. Kadangi praktikoje dažniau pasiekiama uždarymo riba, o ne užstato apribojimas, šiai strategijai suteikiame pavadinimą – \textbf{didžiausia skola}.
+Paprasta likvidavimo algoritmo idėja gali būti tokia: turint likviduojamo skolininko poziciją, pasirenkama paskolos valiuta, kuriai skolininkas turi didžiausią įsipareigojimą, ir užstato valiuta, kurios vertė skolininko pozicijoje yra didžiausia. Tuomet stengiamasi grąžinti tiek, kiek leidžia uždarymo riba (paprastai – pusę pasiskolintos valiutos vertės), arba tiek, kad būtų išnaudotas visas skolininko užstatas pasirinkta valiuta. Kadangi praktikoje dažniau pasiekiama uždarymo riba, o ne užstato apribojimas, šiai strategijai suteikiame pavadinimą – \textit{didžiausia skola}.
 
-Ši strategija literatūroje dar kartais vadinama \textbf{iki uždarymo ribos} (angl. \textit{up to close factor}) \cite{Emp}. Šiame darbe abu terminai vartojami skirtinguose kontekstuose: kai galime laisvai pasirinkti skolos ir užstato valiutas, strategija vadinama \textbf{didžiausia skola}, o kai valiutų pora jau yra fiksuota, vartojamas pavadinimas \textbf{iki uždarymo ribos}.
+Ši strategija literatūroje dar kartais vadinama \textit{iki uždarymo ribos} (angl. \textit{up to close factor}) \cite{Emp}. Šiame darbe abu terminai vartojami skirtinguose kontekstuose: kai galime laisvai pasirinkti skolos ir užstato valiutas, strategija vadinama \textit{didžiausia skola}, o kai valiutų pora jau yra fiksuota, vartojamas pavadinimas \textit{iki uždarymo ribos}.
 
 Svarbu pažymėti, kad skolininko užstato vertė yra ribojama išgryninimo galimybėmis – paskolų platformose likvidatorius užstatą gauna apgaubta forma (angl. \textit{wrapped}), kurią reikia papildomai konvertuoti į grynąją (angl. \textit{underlying}) valiutą. Gali kilti situacijų, kai grynoji užstato forma tuo metu yra nepasiekiama, nes visa valiuta yra paskolinta kitiems skolininkams. Dėl to ne visada įmanoma iš karto atsiimti visą užstato vertę. Toliau šiame darbe, kalbant apie skolininko užstato vertę, bus daroma prielaida, kad kalbama apie skolininko užstato dalį, kurią galima tuo metu išsigryninti.
 
@@ -455,13 +455,11 @@ Kitu atveju ($\text{B}_{\text{užstato}} > \text{B}_{\text{uždarymo}}$), ieško
 
 Galima įsivaizduoti, kad \ref{sec:esami_tyrimai} skyriuje aprašytas algoritmas taip pat ieško didžiausio $\text{B}_{i}$ pirmajai likvidacijai, užtikrinančio, jog po jos skolininkas išliks likviduojamas. Tačiau mūsų algoritmas reikalauja ne tik, kad skolininkas išliktų likviduojamas, bet ir kad būtų galima likviduoti reikšmingą kiekį valiutos. Šis papildomas reikalavimas yra ypač aktualus tais atvejais, kai grąžinama valiuta yra pagrindinė blokų grandinės valiuta – BNB.
 
-Tais atvejais, kai skolininkas yra stipriai įsiskolinęs, siūlomas algoritmas atliks seką likvidacijų, kurių kiekviena bus dvigubai mažesnė už ankstesnę. Tai tęsis tol, kol bus grąžinta visa skola arba išnaudotas visas užstatas. Dėl šios savybės šią modifikuotą strategiją vadiname \textbf{pilno išeikvojimo} strategija (angl. \textit{drain strategy}).
+Tais atvejais, kai skolininkas yra stipriai įsiskolinęs, siūlomas algoritmas atliks seką likvidacijų, kurių kiekviena bus dvigubai mažesnė už ankstesnę. Tai tęsis tol, kol bus grąžinta visa skola arba išnaudotas visas užstatas. Dėl šios savybės šią modifikuotą strategiją vadiname \textit{pilno išeikvojimo} strategija (angl. \textit{drain strategy}).
 
 \subsection{Pilnas išeikvojimas vienodoms valiutoms}
 
-Ši strategija yra \textbf{pilno išeikvojimo} strategijos specializacija, taikoma tik tiems atvejams, kai skolos ir užstato valiutos sutampa. Tokiose situacijose atliekamos pilnos išeikvojimo likvidacijos visoms valiutų poroms, kur skolos ir užstato valiuta yra identiška. Prioritetas teikiamas toms valiutoms, kurių reikšmė $\min(\text{skolos vertė}, \text{užstato vertė} / \text{likvidacijos paskata})$ yra didžiausia, ir einama žemyn, kol skolininkas nebėra likviduojamas. Šios strategijos privalumai – sumažinta valiutų konvertavimo rizika, išvengiama papildomų mokesčių, susijusių su keitimu, bei sumažinama likvidumo trūkumo tikimybė kitose rinkose, nes visa likvidacija vyksta vienoje valiutų poroje. Pelnas tokiu atveju taip pat išmokamas ta pačia valiuta.
-
-% Norint pritaikyti šią strategiją, būtina, kad skolininko pozicijoje būtų ta pati valiuta tiek skolos, tiek užstato pusėje. Tokios pozicijos nėra dažnos, tačiau jos visgi pasitaiko praktikoje. Tokia struktūra gali atsirasti dėl specifinių strategijų. Viena jų \textbf{paskatų rinkimas (angl. incentive reward farming).} \textit{Venus} protokole tiek skolintojai, tiek skolininkai gali gauti paskatas tam tikromis valiutomis, jei tuo metu konkrečiai valiutai yra aktyvi paskatų programa \cite{venusrewards}. Pateikus užstatą USDT ir tuo pačiu pasiskolinus USDT, naudotojas gali gauti paskatas abiejose pozicijos pusėse. Pavyzdžiui, jei užstato metinė grąža siekia 5\%, o skolos palūkanos – 9\%, tai iš pirmo žvilgsnio reikštų 4\% nuostolį, jei pasiskolinta suma investuojama be papildomos grąžos. Tačiau jei tuo metu paskatos siekia po 6\% tiek už užstatą, tiek už skolą, bendras rezultatas tampa teigiamas: 5\% (užstato palūkanos) + 6\% (užstato paskata) + 6\% (skolos paskata) − 9\% (skolos palūkanos) = +8\% metinė grąža. Tokiu atveju pasiskolintus USDT galima pakartotinai naudoti kaip užstatą, didinant bendrą pozicijos dydį ir gaunant papildomą pelną nuo pradinių investuotų lėšų. Kiti protokolai kaip AAVA taip pat turi paskatų sistemą \cite{aaveincentives}.
+Ši strategija yra \textit{pilno išeikvojimo} strategijos specializacija, taikoma tik tiems atvejams, kai skolos ir užstato valiutos sutampa. Tokiose situacijose atliekamos pilnos išeikvojimo likvidacijos visoms valiutų poroms, kur skolos ir užstato valiuta yra identiška. Prioritetas teikiamas toms valiutoms, kurių reikšmė $\min(\text{skolos vertė}, \text{užstato vertė} / \text{likvidacijos paskata})$ yra didžiausia, ir einama žemyn, kol skolininkas nebėra likviduojamas. Šios strategijos privalumai – sumažinta valiutų konvertavimo rizika, išvengiama papildomų mokesčių, susijusių su keitimu, bei sumažinama likvidumo trūkumo tikimybė kitose rinkose, nes visa likvidacija vyksta vienoje valiutų poroje. Pelnas tokiu atveju taip pat išmokamas ta pačia valiuta.
 
 Norint pritaikyti šią strategiją, būtina, kad skolininko pozicijoje būtų ta pati valiuta tiek skolos, tiek užstato pusėje. Nors tokios pozicijos pasitaiko retai, jos gali atsirasti dėl tam tikrų paskatų struktūrų. \textit{Venus} protokole tiek skolintojai, tiek skolininkai gali gauti papildomas paskatas konkrečiomis valiutomis, jei tai numatyta aktyvioje paskatų programoje \cite{venusrewards}. Pavyzdžiui, jei naudotojas užstato USDT ir kartu pasiskolina USDT, jis gali gauti paskatas abejose pozicijos pusėse. Tarkime, kad užstato metinė grąža yra 5\%, o skolos palūkanos – 9\%. Iš pirmo žvilgsnio tai reikštų 4\% nuostolį, jei pasiskolinta suma investuojama be papildomos grąžos. Tačiau jei paskatos siekia po 6\% tiek už užstatą, tiek už skolą, bendras rezultatas tampa teigiamas: 5\% (užstato palūkanos) + 6\% (užstato paskata) + 6\% (skolos paskata) − 9\% (skolos palūkanos) = +8\% metinė grąža. Tokiu atveju pasiskolinti USDT gali būti pakartotinai užstatomi, taip padidinant pozicijos dydį ir generuojant papildomą grąžą nuo pradinės investicijos. Panašias paskatų sistemas naudoja ir kiti protokolai, tokie kaip \textit{Aave} \cite{aaveincentives}.
 
@@ -476,7 +474,7 @@ Norint pritaikyti šią strategiją, būtina, kad skolininko pozicijoje būtų t
 
 \subsection{Nuo didžiausio užstato koeficiento}
 
-Toliau šiame darbe yra siųloma strategija \textbf{nuo didžiausio užstato koeficiento}, kuri maksimizuoja bendrą likvidacijos dydį su fiksuota paskolos valiuta ir nefiksuota užstato valiutą. Strategija apibrežia kurią užstato valiuta likviduoti tam tikru momentu priklausomai nuo skolininko pozicijos.
+Toliau šiame darbe yra siųloma strategija \textit{nuo didžiausio užstato koeficiento}, kuri maksimizuoja bendrą likvidacijos dydį su fiksuota paskolos valiuta ir nefiksuota užstato valiutą. Strategija apibrežia kurią užstato valiuta likviduoti tam tikru momentu priklausomai nuo skolininko pozicijos.
 
 Grįžtant prie sveikumo koeficiento formulės \ref{eq:health_factor}, galima pastebėti, kad skolinimosi pajėgumas priklauso nuo užstato koeficientų – kuo didesnis užstato koeficientas (CF), tuo labiau atitinkamos valiutos vertė prisideda prie skolinimosi pajėgumo. Likvidatorius gali turėti galimybę paveikti, kaip greitai mažėja skolinimosi pajėgumas, priklausomai nuo to, kuri užstato valiuta pasirenkama likviduoti. 
 
@@ -508,7 +506,7 @@ Perkėlus narius į kitą pusę, gauname tokią sąlygą:
     \label{eq:nesveikumo_inequalinty_2}
 \end{equation}
 
-Išraiškai $(I \cdot CF - 1)$ suteikiame pavadinimą \textbf{gydymo koeficientas}, nes ji nusako, kaip greitai nelygybė artėja prie ribos didinant grąžinamos paskolos dydį $R$. \ref{tab:cf_scenarijai} lentelėje pateikti keli pavyzdiniai scenarijai su skirtingais užstato koeficientais.
+Išraiškai $(I \cdot CF - 1)$ suteikiame pavadinimą \textit{gydymo koeficientas}, nes ji nusako, kaip greitai nelygybė artėja prie ribos didinant grąžinamos paskolos dydį $R$. \ref{tab:cf_scenarijai} lentelėje pateikti keli pavyzdiniai scenarijai su skirtingais užstato koeficientais.
 
 % Užstato koeficiento ($CF$) įtaka gydymo koeficientui
 \begin{table}[H]
@@ -551,7 +549,7 @@ Turint užstato valiutą su didžiausia verte, iškyla neaiškumas – ar ją ve
 
 \subsection{Nuo mažiausio užstato koeficiento}
 
-Ši strategija yra analogiška \textbf{nuo didžiausio užstato koeficiento} strategijai, tačiau skirtumas slypi tvarkoje: užstato valiutos pradiniame sąraše rikiuojamos didėjančia tvarka pagal užstato koeficientą. Jei kelių valiutų koeficientai sutampa, jos toliau rikiuojamos pagal užstato vertę didėjančia tvarka.
+Ši strategija yra analogiška \textit{nuo didžiausio užstato koeficiento} strategijai, tačiau skirtumas slypi tvarkoje: užstato valiutos pradiniame sąraše rikiuojamos didėjančia tvarka pagal užstato koeficientą. Jei kelių valiutų koeficientai sutampa, jos toliau rikiuojamos pagal užstato vertę didėjančia tvarka.
 
 Šios strategijos tikslas – išsiaiškinti, ar užstato valiutų tvarka turi reikšmingos įtakos likvidatoriaus galutiniam pelnui. Ji įtraukta tyrimo tikslais kaip kontrolinė versija, leidžianti palyginti rezultatų skirtumus su strategija, kurioje tvarka yra priešinga.
 
@@ -667,9 +665,6 @@ Grąžinamos sumos dydžiui nustatyti parašytos funkcijos, kurios iš blokų gr
   Kadangi BUSD-T buvo gautas pirmajame pavedime, (11) pavedimu 
   grąžina 1238753 BUSD (maždaug 99,45\% iš (10) gautos sumos) pirmajai keityklai.
 
-  % \item \textbf{Pelnas likvidatoriui.}  
-  % Po visų veiksmų likvidatoriaus piniginėje lieka 6743 BUSD, kurie (12-uoju pavedimu) pervedami į pelno piniginę. BUSD prilygsta JAV dolerį, todėl galutinės pajamos \$6743, kur mokestis už tranzakciją \$204, todėl pelnas \$6539.
-
   \item \textbf{Pelnas likvidatoriui.}  
 Po visų veiksmų likvidatoriaus piniginėje lieka 6743 BUSD, kurie (12-uoju pavedimu) pervedami į pelno piniginę.  
 Kadangi BUSD prilygsta JAV doleriui, galutinės pajamos yra 6743 JAV doleriai.  
@@ -713,15 +708,15 @@ gautos valiutos.
 \ref{liquidation_example_repeat} lentelėje pateikti skaičiai gauti pakartojus likvidaciją. Matome, kad pajamos yra 121 tūkstantis, kur \ref{img:liquidation_example} pav. pajamos yra tiktais 6,7 tūkstančiai. Šis skirtumas atsiranda iš to, kad orakulo kaina nesutampa su tuo ką gavo likvidatorius atliekant konvertavimus. Paimkime net pirmą konvertavimą po likvidacijos - ETH į BNB. Pagal orakulo kainas likvidatorius turėjo gauti 4480,7 BNB, tačiau gavo 4176,95 (6,78\% mažiau). Tai gali būti tiek dėl orakulo ETH pervertinimo, o gal ETH-BNB keitykla tuo metu turėjo prastą kainą ir/arba mažą likvidumą. Pažymime, kad mūsų tyrimui šis skirtumas nėra svarbus, nes koncentruojamės tik į likvidacijos dalies optimizaciją ir proporciškai lyginame gautą užstatą.
 
 \subsubsection{Strategijų lyginimas}
-Toliau lyginamos skirtingos strategijos. Siekiant aiškiau suprasti situaciją, \ref{tab:strategijos_cf_analize} lentelėje pateikiama skolininko pradinė pozicija – nurodomos paskolos ir užstato valiutos, jų vertės bei atitinkami užstato koeficientai (CF). Remiantis \ref{liquidation_example_comp} lentelės duomenimis, matyti, kad originali likvidacija (\$1{,}21 mln.) buvo gerokai mažesnė nei maksimali galima suma (\$75{,}49 mln.) taikant strategiją \textbf{iki uždarymo ribos}. Strategija \textbf{didžiausia skola} sutampa su \textbf{iki uždarymo ribos}, nes skolininko pozicijoje buvo tik viena pasiskolinta valiuta, o istorinis likvidatorius pasirinko likviduoti didžiausią užstatą – ETH. Naudojant orakulo teikiamas valiutų vertes, buvo galima pasiekti iki \$7{,}54 mln. pelną, tačiau tai reikalautų didelės apimties valiutų konvertavimo. Tokios operacijos reikalauja labai likvidžių rinkų, o siekiant išvengti reikšmingų kainų svyravimų, konvertavimą galimai tektų skaidyti per kelias rinkas. Pastebėtina, kad net ir originalus likvidatorius, konvertavęs tik \$1{,}21 mln. vertės turtą, jau susidūrė su nepalankiomis kainomis. Likusių rinkų likvidumo įvertinti negalime, nes tai reikalautų papildomos istorinės tų metų rinkų analizės.
+Toliau lyginamos skirtingos strategijos. Siekiant aiškiau suprasti situaciją, \ref{tab:strategijos_cf_analize} lentelėje pateikiama skolininko pradinė pozicija – nurodomos paskolos ir užstato valiutos, jų vertės bei atitinkami užstato koeficientai (CF). Remiantis \ref{liquidation_example_comp} lentelės duomenimis, matyti, kad originali likvidacija (\$1{,}21 mln.) buvo gerokai mažesnė nei maksimali galima suma (\$75{,}49 mln.) taikant strategiją \textit{iki uždarymo ribos}. Strategija \textit{didžiausia skola} sutampa su \textit{iki uždarymo ribos}, nes skolininko pozicijoje buvo tik viena pasiskolinta valiuta, o istorinis likvidatorius pasirinko likviduoti didžiausią užstatą – ETH. Naudojant orakulo teikiamas valiutų vertes, buvo galima pasiekti iki \$7{,}54 mln. pelną, tačiau tai reikalautų didelės apimties valiutų konvertavimo. Tokios operacijos reikalauja labai likvidžių rinkų, o siekiant išvengti reikšmingų kainų svyravimų, konvertavimą galimai tektų skaidyti per kelias rinkas. Pastebėtina, kad net ir originalus likvidatorius, konvertavęs tik \$1{,}21 mln. vertės turtą, jau susidūrė su nepalankiomis kainomis. Likusių rinkų likvidumo įvertinti negalime, nes tai reikalautų papildomos istorinės tų metų rinkų analizės.
 
-Vis dėlto buvo galima likviduoti dar didesnį kiekį nei \$75,49 mln., pasinaudojus pasiūlyta \textbf{pilno išeikvojimo} strategija. \ref{liquidation_example_comp} lentelėje šiai strategijai pateiktos dvi dalinės likvidacijos, išskirtos skolos grąžinimo ir užstato paėmimo stulpeliuose. Pirmosios likvidacijos dydis siekė \$36,27 mln., po jos skolininko sveikumo koeficientas turėjo likti šiek tiek mažesnis nei 1. Antroji likvidacija sudarė \$46,29 mln., tad bendra grąžinta skola iš viso siekė \$82,56 mln., o atitinkamai ir likvidatoriaus atlygis buvo proporcingai didesnis.
+Vis dėlto buvo galima likviduoti dar didesnį kiekį nei \$75,49 mln., pasinaudojus pasiūlyta \textit{pilno išeikvojimo} strategija. \ref{liquidation_example_comp} lentelėje šiai strategijai pateiktos dvi dalinės likvidacijos, išskirtos skolos grąžinimo ir užstato paėmimo stulpeliuose. Pirmosios likvidacijos dydis siekė \$36,27 mln., po jos skolininko sveikumo koeficientas turėjo likti šiek tiek mažesnis nei 1. Antroji likvidacija sudarė \$46,29 mln., tad bendra grąžinta skola iš viso siekė \$82,56 mln., o atitinkamai ir likvidatoriaus atlygis buvo proporcingai didesnis.
 
-Iki šiol buvo aptariamos strategijos, kuriose tiek paskolos, tiek užstato valiutos buvo fiksuotos – pavyzdžiui, kai buvo likviduojama konkreti pora (\textit{USDT, ETH}). Taikant \textbf{nuo didžiausio užstato koeficiento} strategiją, paskolos valiuta (USDT) išlieka fiksuota, tačiau atsiranda galimybė pasirinkti, kurią užstato valiutą likviduoti. 
+Iki šiol buvo aptariamos strategijos, kuriose tiek paskolos, tiek užstato valiutos buvo fiksuotos – pavyzdžiui, kai buvo likviduojama konkreti pora (\textit{USDT, ETH}). Taikant \textit{nuo didžiausio užstato koeficiento} strategiją, paskolos valiuta (USDT) išlieka fiksuota, tačiau atsiranda galimybė pasirinkti, kurią užstato valiutą likviduoti. 
 
-Taikant \textbf{nuo didžiausio užstato koeficiento} strategiją, buvo įvykdyti trys likvidacijos veiksmai, kiekvienas naudojant skirtingą užstato valiutą. Bendra sugrąžintos paskolos vertė siekė \$93{,}62 mln. – tai 13\,\% daugiau nei taikant \textbf{pilno išeikvojimo} strategiją. Atidžiau išanalizavus matyti, kad \textbf{pilno išeikvojimo} strategijoje naudotas užstatas visiškai sutampa su skolininko turimu ETH kiekiu. Tai reiškia, kad antroji likvidacija buvo apribota užstato kiekiu ir net nepasiekė uždarymo ribos. Vadinasi, apsiribojus vienos valiutos užstato likvidavimu, prarandama dalis galimo pelno. Priešingai, \textbf{nuo didžiausio užstato koeficiento} strategija leidžia naudoti kelias užstato valiutas, todėl nėra apribojama konkrečios valiutos kiekiu, o likvidacija vyksta tol, kol pasiekiama uždarymo riba. Tokiu būdu ši strategija leidžia efektyviau išnaudoti skolininko užstatus ir generuoja didesnę grąžą.
+Taikant \textit{nuo didžiausio užstato koeficiento} strategiją, buvo įvykdyti trys likvidacijos veiksmai, kiekvienas naudojant skirtingą užstato valiutą. Bendra sugrąžintos paskolos vertė siekė \$93{,}62 mln. – tai 13\,\% daugiau nei taikant \textit{pilno išeikvojimo} strategiją. Atidžiau išanalizavus matyti, kad \textit{pilno išeikvojimo} strategijoje naudotas užstatas visiškai sutampa su skolininko turimu ETH kiekiu. Tai reiškia, kad antroji likvidacija buvo apribota užstato kiekiu ir net nepasiekė uždarymo ribos. Vadinasi, apsiribojus vienos valiutos užstato likvidavimu, prarandama dalis galimo pelno. Priešingai, \textit{nuo didžiausio užstato koeficiento} strategija leidžia naudoti kelias užstato valiutas, todėl nėra apribojama konkrečios valiutos kiekiu, o likvidacija vyksta tol, kol pasiekiama uždarymo riba. Tokiu būdu ši strategija leidžia efektyviau išnaudoti skolininko užstatus ir generuoja didesnę grąžą.
 
-Apie \textbf{nuo didžiausio užstato koeficiento} atvejį dar galima pasakyti, kad XVS užstatas buvo nelikviduotas, nes jo vertė siekė tik apie 5 centus, o likvidacijos kvietimas būtų kainavęs daugiau nei gautas pelnas. Taip pat šiuo atveju visos skolininko pozicijoje esančios užstato valiutos turėjo vienodą užstato koeficientą (CF), todėl rikiavimas pagal koeficientą nedarė įtakos. Dėl to \textbf{nuo mažiausio užstato koeficiento} strategija generavo identišką pelną kaip ir \textbf{nuo didžiausio užstato koeficiento}.
+Apie \textit{nuo didžiausio užstato koeficiento} atvejį dar galima pasakyti, kad XVS užstatas buvo nelikviduotas, nes jo vertė siekė tik apie 5 centus, o likvidacijos kvietimas būtų kainavęs daugiau nei gautas pelnas. Taip pat šiuo atveju visos skolininko pozicijoje esančios užstato valiutos turėjo vienodą užstato koeficientą (CF), todėl rikiavimas pagal koeficientą nedarė įtakos. Dėl to \textit{nuo mažiausio užstato koeficiento} strategija generavo identišką pelną kaip ir \textit{nuo didžiausio užstato koeficiento}.
 
 \begin{table}[H]
 \centering
@@ -753,7 +748,7 @@ ETH  &  0         &  90,82M   & 80\%  \\ \hline
   \end{table}
 
 \subsection{Pilnas išeikvojimas vienodoms valiutoms}
-Parodome, kad pilno išeikvojimo strategija gali būti efektyvesnė nei primityvioji \textit{didžiausios skolos} strategija, kartu eliminuodami valiutos likvidumo klausimą. Šiame skyriuje nagrinėjame tik tuos atvejus, kai grąžinimo ir užstato valiutos sutampa, todėl ir pelnas bus išreikštas ta pačia valiuta.
+Parodome, kad \textit{pilno išeikvojimo} strategija gali būti efektyvesnė nei primityvioji \textit{didžiausios skolos} strategija, kartu eliminuojant valiutos likvidumo klausimą. Šiame skyriuje analizuojame tik tuos atvejus, kai skolos grąžinimo ir užstato valiutos sutampa, todėl pelnas taip pat išreiškiamas ta pačia valiuta. Tokį apribojimą motyvuoja tai, kad sudėtingesnė \textit{pilnas išeikvojimo} strategija leidžia grąžinti didesnę skolos dalį ir atgauti didesnę užstato sumą, kas dažnai reikalauja didelius valiutų keitimo kitose rinkose. Tačiau didesni keitimo kiekiai lemia didesnį kainos pokytį nepalankia kryptimi. Taigi, nors iš vienos pusės optimizuojamas likvidacijos dydis, kartu patiriamas ir didesnis kainos nuokrypis, galintis sumažinti arba visiškai panaikinti pelno augimą. Todėl šio skyriaus analizėje koncentruojamės į scenarijus, kuriuose valiutų keitimas nėra būtinas. Išimtį sudaro atvejai, kai likvidatoriui pelnas pageidaujamas konkrečia valiuta – tuomet atliekami valiutų keitimai, tačiau jų apimtis gerokai mažesnė, nes keičiamas tik pelnas, t. y. apie 10\% grąžintos skolos dydžio.
 
 Arbitražo vykdymo kontekste likviduojama valiuta nebūtinai yra ta, kurią likviduotojas ketina laikyti ilgesnį laiką. Todėl, įvykdęs likvidaciją, likviduotojas gali gautą pelną ta valiuta konvertuoti į stabilesnę, pavyzdžiui, USDC, kuris yra susietas su JAV doleriu. Šis konvertavimą galima atlikti atskiroje tranzakcijoje, kurios kuro mokestis už vienetą yra mažesnis nei pačios likvidacijos metu.
 
@@ -769,13 +764,13 @@ Kalbant apie skolos grąžinimą, būtina turėti kapitalo, reikalingo skolai pa
 % AND (drain_same_token->>'profit_usd')::NUMERIC > 0
 % ORDER BY 1 DESC
 
-Iš išanalizuotų likvidacijų identifikuotas pelningiausias \textbf{pilno išeikvojimo vienodoms valiutoms} strategijos atvejis. Analizuojame likvidaciją \\ \texttt{0xcebfe3ec5782ad5f1a52f3727c3986abb1f2314cd1c0f0baf18ec20e1000fea9}.
+Iš išanalizuotų likvidacijų identifikuotas pelningiausias \textit{pilno išeikvojimo vienodoms valiutoms} strategijos atvejis. Analizuojame tranzakciją \\ \texttt{0xcebfe3ec5782ad5f1a52f3727c3986abb1f2314cd1c0f0baf18ec20e1000fea9}.
 
 \ref{tab:drain_same_token_position_most} lentelėje pateikta skolininko pozicija – ji sudaryta tik iš DOGE valiutos. Dėl šios priežasties daugelio strategijų veiksmai sutampa. \ref{tab:drain_same_token_profit_most} lentelėje pateikti skirtingų strategijų pelnai.
 
-Šiuo atveju originalus likvidatorius likvidavo iki uždarymo ribos, todėl jo pelnas sutampa su \textbf{iki uždarymo ribos} strategijos rezultatu. \textbf{Didžiausia skola} strategija taip pat duoda tokį patį rezultatą, kadangi nėra kitų galimų valiutų porų (tik DOGE-DOGE).
+Šiuo atveju originalus likvidatorius likvidavo iki uždarymo ribos, todėl jo pelnas sutampa su \textit{iki uždarymo ribos} strategijos rezultatu. \textit{Didžiausia skola} strategija taip pat duoda tokį patį rezultatą, kadangi nėra kitų galimų valiutų porų (tik DOGE-DOGE).
 
-\textbf{Pilno išeikvojimo} strategijai pavyko likviduoti didesnį kiekį skolos nei paprastai \textbf{iki uždarymo ribos} strategijai, todėl ji uždirbo apie 20\% didesnį pelną. Kaip matyti ir iš lentelės, skolininko sveikatos faktorius ($HF$) po likvidacijos buvo gerokai aukštesnis, todėl ši strategija pasirodė efektyvesnė likviduojant kuo didesnę skolos dalį.
+\textit{Pilno išeikvojimo} strategijai pavyko likviduoti didesnį kiekį skolos nei paprastai \textit{iki uždarymo ribos} strategijai, todėl ji uždirbo apie 20\% didesnį pelną. Kaip matyti ir iš lentelės, skolininko sveikatos faktorius ($HF$) po likvidacijos buvo gerokai aukštesnis, todėl ši strategija pasirodė efektyvesnė likviduojant kuo didesnę skolos dalį.
 
 \begin{table}[H]
 \centering
@@ -801,7 +796,7 @@ DOGE &  2 617 497   &  5 822 673       & 40\% & 0,889 \\ \hline
   \label{tab:drain_same_token_profit_most}
   \end{table}
 
-\subsubsection{Proporcingai pelningiausias su didziausia skola}
+\subsubsection{Kitas atvejis}
 % SELECT
 % (large_borrow ->>'profit_usd')::NUMERIC AS largest_loan_profit,
 % (drain_same_token->>'profit_usd')::NUMERIC AS same_token_profit,
@@ -812,17 +807,30 @@ DOGE &  2 617 497   &  5 822 673       & 40\% & 0,889 \\ \hline
 % AND (large_borrow ->>'profit_usd')::NUMERIC  > 0
 % ORDER BY (drain_same_token->>'profit_usd')::NUMERIC / (large_borrow ->>'profit_usd')::NUMERIC  DESC
 
+% SELECT * FROM bsc.venus_liquidation_tests
+% WHERE transaction_hash = '0x67cc58e0d8e2ddd8eea396fb3e667bf4ba295541b1d8d3d2ee600529a1f26138'
+% ORDER BY created_at desc
+
+% \begin{table}[H]
+% \centering
+% \caption{Pradinė skolininko pozicija}
+% \label{tab:drain_same_token_position_ratio}
+% \begin{tabular}{|c|c|c|c|c|}
+% \hline
+% \textbf{Valiuta} & \textbf{Skola (\$)} & \textbf{Užstatas (\$)} & \textbf{CF} & \textbf{HF} \\ \hline
+% DOGE &  2 617 497   &  5 822 673       & 40\% & 0,889 \\ \hline
+% \end{tabular}
+% \end{table}
+
 \subsubsection{Bendras pelnas}
 % SELECT count(*) AS total_liquidations,
 % count(*) FILTER (WHERE (drain_same_token->>'profit_usd')::NUMERIC > 0) AS drain_same_token_profitable,
 % count(*) FILTER (WHERE (drain_same_token->>'profit_usd')::NUMERIC > (large_borrow->>'profit_usd')::NUMERIC) AS drain_same_token_more_profitable_than_largest_borrow
 % FROM bsc.venus_liquidation_tests
 
-Iš viso išanalizuota 23\,202 likvidacijų. Iš jų 2\,382 atvejais strategija \textbf{pilnas išeikvojimas vienodoms valiutoms} buvo pelninga. Iš šių atvejų 311 parodė didesnį pelną nei strategija \textbf{didžiausia skola}.
+Iš viso išanalizuota 23\,202 likvidacijų. Iš jų 2\,382 atvejais strategija \textit{pilnas išeikvojimas vienodoms valiutoms} buvo pelninga. Iš šių atvejų 311 parodė didesnį pelną nei strategija \textit{didžiausia skola}.
 
-Vertinant bendrą pelną pasirinktai strategijai, naivu būtų kiekvieną įvykusią likvidaciją analizuoti atskirai, apskaičiuoti pelną pagal pasirinktą strategiją ir šiuos rezultatus tiesiog sumuoti. Kaip matyti iš \ref{liquidation_example_comp} lentelės, istoriniuose duomenyse ne visi likvidatoriai maksimaliai išnaudojo turimą likvidacijos potencialą, o didesnės galimybės dažnai būna išskaidytos į daugybę mažesnių likvidacijų. Dėl to būtų klaidinga sumuoti pelnus kiekvienai atskirai likvidacijai, nes geresnės strategijos atveju tas pats pelnas gali būti įtrauktas kelis kartus. Problema kyla dėl to, kad viena likvidacija gali turėti įtakos kitoms, su ja susijusioms likvidacijoms – modifikuodami vieną iš jų, galime netiesiogiai pakenkti kitoms. Savo tyrime kiekvieną atvejį analizuojame izoliuotai, neatsižvelgdami į jų tarpusavio sąveikas. Dažniausias ryšys tarp skirtingų likvidacijų yra tas pats skolininkas. Kiti galimi priklausomumai – likvidacija, kuri išnaudoja visą likusį grynųjų likutį iš \textit{Venus} valiutų baseino, atima galimybę išsigryninti kitiems dalyviams; arba vieno likvidatoriaus veiksmai sumažina rinkos likvidumą, apsunkindami valiutų keitimą kitiems.
-
-Norėdami įvertinti strategijos \textbf{pilnas išeikvojimas vienodoms valiutoms} bendrą pelningumą, tais atvejais, kai tam pačiam skolininkui galimi keli įvykiai, taikome apribojimą: kiekvienam skolininkui į pelno skaičiavimą įtraukiamas tik vienas – pelningiausias – įvykis. Pritaikius šį apribojimą, pelningų atvejų skaičius sudaro $1304$ iš $2382$.
+Vertinant bendrą pelną pasirinktai strategijai, būtų klaidinga kiekvieną įvykusią likvidaciją analizuoti atskirai, apskaičiuoti pelną pagal pasirinktą strategiją ir šiuos rezultatus tiesiog sumuoti. Kaip matyti iš \ref{liquidation_example_comp} lentelės, istoriniuose duomenyse ne visi likvidatoriai maksimaliai išnaudojo turimą likvidacijos potencialą, o didesnės galimybės dažnai būna išskaidytos į daugybę mažesnių likvidacijų. Dėl to būtų klaidinga sumuoti pelnus kiekvienai atskirai likvidacijai, nes geresnės strategijos atveju tas pats pelnas gali būti įtrauktas kelis kartus. Problema kyla dėl to, kad viena likvidacija gali turėti įtakos kitoms, su ja susijusioms likvidacijoms – modifikuodami vieną iš jų, galime netiesiogiai pakenkti kitoms. Savo tyrime kiekvieną atvejį analizuojame izoliuotai, neatsižvelgdami į jų tarpusavio sąveikas. Dažniausias ryšys tarp skirtingų likvidacijų yra tas pats skolininkas. Kiti galimi priklausomumai – likvidacija, kuri išnaudoja visą likusį grynųjų likutį iš \textit{Venus} valiutų baseino, atima galimybę išsigryninti kitiems dalyviams; arba vieno likvidatoriaus veiksmai sumažina rinkos likvidumą, apsunkindami valiutų keitimą kitiems.
 
 % WITH most_profitable_liquidation_tests AS (
 %     SELECT DISTINCT ON (borrower) *
@@ -865,7 +873,24 @@ Norėdami įvertinti strategijos \textbf{pilnas išeikvojimas vienodoms valiutom
 % )
 % SELECT sum(profit_usd) FROM res
 
-\ref{tab:liq_same_tokens_profit} lentelėje pateikiamas \textbf{pilnas išeikvojimas vienodoms valiutoms} – tai bendras pelnas, gautas per kiekvieną valiutą. Daroma prielaida, kad pelnyta valiuta buvo parduota pagal to meto orakulo kainą, o mokesčiai yra nereikšmingi. Bendras pelnas siekia 1,4 mln. JAV dolerių, t. y. teoriškai buvo galima uždirbti bent tiek, vykdant paprastas likvidacijas, kai grąžinimo ir atsiimamo užstato valiutos yra vienodos. Tokiu atveju galima išvengti galimai nuostolingų valiutų konvertavimų likvidacijos metu bei su tuo susijusių mokesčių – tiek valiutų keitimo, tiek sunaudotų kuro vienetų, ypač esant aukštoms kuro kainoms.
+Siekiant įvertinti strategijos \textit{pilnas išeikvojimas vienodoms valiutoms} bendrą pelningumą tais atvejais, kai tam pačiam skolininkui galimi keli likvidacijos įvykiai, taikomas apribojimas: kiekvienam skolininkui pelno skaičiavime įtraukiamas tik vienas – pelningiausias – įvykis. Pritaikius šį apribojimą, pelningų įvykių skaičius sudaro 1\,304 iš 2\,382 visų identifikuotų pelningų atvejų. Atrinktų įvykių rezultatai pateikti \ref{tab:liq_same_tokens_profit} lentelėje, kurioje nurodomas bendras pelnas, gautas kiekvienoje atskiroje valiutoje. Valiutos vertei nustatyti daroma prielaida, kad gauta pelno suma realizuota pagal tuo metu galiojusią orakulo kainą, o sandorių mokesčiai yra nereikšmingi. Bendra teorinė grąža sudaro apie 1,4 mln.\ JAV dolerių, tai yra tiek būtų buvę galima uždirbti vykdant likvidacijas, kai grąžinimo ir atsiimamo užstato valiutos sutampa. Tokiu būdu išvengiama valiutų konvertavimo operacijų, kurios galėtų būti nuostolingos dėl kainų nepastovumo, bei su tuo susijusių papildomų mokesčių – tiek valiutų keitimo mokesčių, tiek kuro sąnaudų, ypač esant aukštoms \textit{gas} kainoms.
+
+% WITH most_profitable_liquidation_tests AS (
+%     SELECT DISTINCT ON (borrower) *
+%     FROM bsc.venus_liquidation_tests
+%     JOIN bsc.venus_liquidations USING(transaction_hash)
+%     WHERE (drain_same_token ->> 'profit_usd')::NUMERIC > 0
+%     ORDER BY borrower, (drain_same_token ->> 'profit_usd')::NUMERIC DESC
+% )
+% SELECT
+% count(*),
+%     sum((drain_same_token ->>'profit_usd')::NUMERIC) AS drain_total_profit,
+%     sum((large_borrow ->>'profit_usd')::NUMERIC) AS largest_borrow_total_profit
+% FROM most_profitable_liquidation_tests 
+% WHERE TRUE
+% AND (drain_same_token ->>'profit_usd')::NUMERIC > (large_borrow ->>'profit_usd')::NUMERIC
+
+Norint kiekybiškai įvertinti \textit{pilno išeikvojimo vienodoms valiutoms} strategijos pranašumą prieš \textit{didžiausios skolos} metodą, analizuojami tik tie atvejai, kuriuose pirmoji strategija generuoja didesnį pelną. Iš 311 tokių atvejų, 93 susiję su unikaliais skolininkų adresais, todėl tolesnėje analizėje vertinami tik pelningiausi 93 įvykiai — po vieną kiekvienam skolininkui. Šioje imtyje \textit{pilno išeikvojimo} strategija sugeneravo bendrą \$605\,489 pelną, o \textit{didžiausios skolos} metodas – tik \$545\,207. Gauti rezultatai empiriškai patvirtina, kad išplėstinė strategija gali būti finansiškai pranašesnė, kartu eliminuojant valiutų keitimo problematiką, kurios įtaka dažniausiai ryškesnė taikant \textit{pilno išeikvojimo} strategiją.
 
 \begin{table}[H]
 \centering
@@ -875,33 +900,33 @@ Norėdami įvertinti strategijos \textbf{pilnas išeikvojimas vienodoms valiutom
 \hline
 \textbf{Valiuta} & \textbf{Valiutos vertė (\$)} & \textbf{Likvidacijų kvietimai} \\
 \hline
-DOGE  & 333 188.40  & 21 \\
-BUSD  & 280 728.73  & 301 \\
-SXP   & 169 691.27  & 57 \\
-ETH   & 134 977.21  & 120 \\
-DAI   & 119 947.04  & 26 \\
-BTC   & 91 450.61   & 173 \\
-USDT  & 85 647.06   & 321 \\
-BNB   & 81 680.97   & 374 \\
-USDC  & 80 301.13   & 174 \\
-XVS   & 20 878.56   & 14 \\
-MATIC & 12 799.84   & 10 \\
-AAVE  & 8 226.96    & 7 \\
-DOT   & 1 654.70    & 19 \\
-XRP   & 1 519.91    & 23 \\
-ADA   & 1 145.77    & 17 \\
-BETH  & 899.91     & 30 \\
-CAKE  & 895.97     & 11 \\
-BCH   & 614.01     & 5 \\
-WBETH & 484.21     & 2 \\
-CAN   & 349.34     & 9 \\
-FIL   & 135.10     & 5 \\
-LTC   & 89.87      & 11 \\
-LINK  & 60.36      & 8 \\
-TRX   & 50.41      & 1 \\
-TRXOLD & 43.02     & 8 \\
-UST   & 24.71      & 1 \\
-TUSD  & 3.79       & 1 \\
+DOGE  & 333\,188,40  & 21 \\
+BUSD  & 280\,728,73  & 301 \\
+SXP   & 169\,691,27  & 57 \\
+ETH   & 134\,977,21  & 120 \\
+DAI   & 119\,947,04  & 26 \\
+BTC   & 91\,450,61   & 173 \\
+USDT  & 85\,647,06   & 321 \\
+BNB   & 81\,680,97   & 374 \\
+USDC  & 80\,301,13   & 174 \\
+XVS   & 20\,878,56   & 14 \\
+MATIC & 12\,799,84   & 10 \\
+AAVE  & 8\,226,96    & 7 \\
+DOT   & 1\,654,70    & 19 \\
+XRP   & 1\,519,91    & 23 \\
+ADA   & 1\,145,77    & 17 \\
+BETH  & 899,91     & 30 \\
+CAKE  & 895,97     & 11 \\
+BCH   & 614,01     & 5 \\
+WBETH & 484,21     & 2 \\
+CAN   & 349,34     & 9 \\
+FIL   & 135,10     & 5 \\
+LTC   & 89,87      & 11 \\
+LINK  & 60,36      & 8 \\
+TRX   & 50,41      & 1 \\
+TRXOLD & 43,02     & 8 \\
+UST   & 24,71      & 1 \\
+TUSD  & 3,79       & 1 \\
 \hline
 \end{tabular}
 \end{table}
@@ -1002,7 +1027,7 @@ Atkartojimo strategija pasirodė esanti veiksminga, nes buvo pastebėta, kad ne 
     \end{itemize}
 \end{enumerate}
 
-Taip pat, nebuvo analizuojamos likvidacijos, kurios išnaudojo \textit{Venus} protokolo mechanizmo klaidą, susijusią su paskatų kaupimu naudojantis protokolu. Naudotojai, skolindami arba skolindamiesi protokole, kaupė atlygį, kurį galėjo atsiimti iškviesdami funkciją \textbf{claimVenus}. Įdomu tai, kad šią funkciją galėjo iškviesti bet kuris adresas kito naudotojo vardu. Tai suteikė galimybę išnaudotojams aptikti adresus, kurie buvo stipriai įsiskolinę ir sukaupę nemažą atlygį, atsiimti sukauptą atlygį jų vardu ir tuoj pat inicijuoti jų likvidaciją. Vienas tokio išnaudojimo pavyzdys užfiksuotas tranzakcijoje: 0x801001726f7c0c2434a8ea1680213ebfd5201094087c94d7dac44b7860555f1c. Šis pažeidžiamumas vėliau buvo pašalintas, įdiegiant apribojimą, kad \textit{claimVenus} funkcija negali būti sėkmingai iškviečiama, jei pozicija yra likviduojama ($HF < 1$) \cite{exploitFix}.
+Taip pat, nebuvo analizuojamos likvidacijos, kurios išnaudojo \textit{Venus} protokolo mechanizmo klaidą, susijusią su paskatų kaupimu naudojantis protokolu. Naudotojai, skolindami arba skolindamiesi protokole, kaupė atlygį, kurį galėjo atsiimti iškviesdami funkciją \textit{claimVenus}. Įdomu tai, kad šią funkciją galėjo iškviesti bet kuris adresas kito naudotojo vardu. Tai suteikė galimybę išnaudotojams aptikti adresus, kurie buvo stipriai įsiskolinę ir sukaupę nemažą atlygį, atsiimti sukauptą atlygį jų vardu ir tuoj pat inicijuoti jų likvidaciją. Vienas tokio išnaudojimo pavyzdys užfiksuotas tranzakcijoje: 0x801001726f7c0c2434a8ea1680213ebfd5201094087c94d7dac44b7860555f1c. Šis pažeidžiamumas vėliau buvo pašalintas, įdiegiant apribojimą, kad \textit{claimVenus} funkcija negali būti sėkmingai iškviečiama, jei pozicija yra likviduojama ($HF < 1$) \cite{exploitFix}.
 
 % \section{Formatavimas}
 
