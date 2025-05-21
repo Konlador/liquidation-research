@@ -159,10 +159,10 @@ WHERE TRUE
     AND (block_number >= 31302048 OR v_token_collateral <> '0x151b1e2635a717bcdc836ecd6fbb62b674fe3e1d') -- not handling istanbul xvs collaterals because the claim venus rewards
     AND v_token <> '0x95c78222b3d6e262426483d42cfa53685a67ab9d' -- not vbusd
     AND borrower <> '0x489a8756c18c0b8b24ec2a2b9ff3d4d447f79bec' -- bnb bridge exploiter
-    AND block_number < 31302048 -- istanbul
+    --AND block_number < 31302048 -- istanbul
     --AND block_number >= 31302048 AND block_number < 35490444 -- berlin
     --AND block_number >= 35490444 AND block_number < 39769787 -- shanghai
-    --AND block_number >= 39769787 -- cancun
+    AND block_number >= 39769787 -- cancun
     --AND block_number < 32929228
     --AND v_token_collateral <> '0x151b1e2635a717bcdc836ecd6fbb62b674fe3e1d' -- not handling xvs collateral because claim venus rewards
     --AND transaction_hash = '0x8d286fa28b0eb4d4d4e1a8cdaf078190f207921f5d1a5f198de56f5995e2c606'
@@ -171,7 +171,7 @@ ORDER BY random()
 SELECT * 
 FROM liquidations_to_test
 WHERE TRUE
---AND row_num = 1
+AND row_num = 1
 AND is_tested = false
 ",
             &[],
