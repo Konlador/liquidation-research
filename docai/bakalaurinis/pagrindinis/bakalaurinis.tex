@@ -166,9 +166,6 @@ Skyriuje \ref{sec:pelningumo_skaiciavimas} išplėsta pelningumo skaičiavimo fo
 Skyriuose \ref{sec:istoriniu_likvidaciju_analizes_pavyzdys} ir \ref{sec:lyginimas_daug} papildomai įtraukta naujų strategijų analizė bei pateiktos skolininkų pradinių pozicijų būsenos.
 
 \section{Kas yra arbitražas}
-% TODO
-% Dar prieš DeFi atsiradimą arbitražas buvo svarbi strategija tradicinėse finansų rinkose – vertybinių popierių, valiutų ir prekių biržose. Tokios platformos kaip „Bitfinex“, „Poloniex“ ar net ankstyvasis „Mt. Gox“ leido vartotojams pastebėti kainų skirtumus tarp skirtingų biržų ir pelnytis iš jų. Vėliau šios idėjos natūraliai persikėlė į decentralizuotų finansų (DeFi) erdvę, kur blokų grandinių technologijos sudarė sąlygas arbitražui vykti automatizuotai, be tarpininkų. Galima sakyti, kad DeFi tik išplėtė ir pagreitino jau egzistavusias arbitražo praktikas.
-
 Arbitražo sąvokos išmanymas yra svarbus šio darbo kontekste, nes būtent arbitražo galimybės motyvuoja likvidatorių veiklą decentralizuotose finansų (DeFi) sistemose. Likvidacijos metu gautą užstatą dažnai reikia konvertuoti į kitą valiutą siekiant užfiksuoti pelną, o tai yra arbitražui būdingas veiksmas. Todėl norint suprasti, kaip optimizuoti likvidacijų pelningumą, būtina suvokti arbitražo principus. Šis skyrius apibrėžia, kas yra arbitražas, ir pateikia pagrindines jo formas bei realizavimo galimybes kriptovaliutų rinkose.
 
 Arbitražas yra finansinė strategija, grindžiama ekonominių skirtumų išnaudojimu tarp dviejų ar daugiau rinkų, siekiant gauti pelną be jokios rizikos ar su minimalia rizika. Paprastai tariant, tai yra praktika, kai investuotojai perka tam tikrus finansinius instrumentus, tokius kaip prekės ar valiutos pigesnėje rinkoje, ir tuoj pat pardavinėja juos brangesnėje rinkoje, gaudami pelną iš šio kainų skirtumo.
@@ -182,7 +179,7 @@ Paprasčiausias arbitražas susideda iš kainų skirtumų tarp dviejų rinkų. T
     \item pradėti arbitražą ne vien tik su viena stabiliąja valiuta, bet su keliomis. Taip galima efektyviau išnaudoti turimą kapitalą, nes skirtingos stabilių valiutų pozicijos gali suteikti daugiau lankstumo ir galimybių reaguoti į kainų skirtumus įvairiose biržose;
     \item išskaidyti valiutos konvertavimą į kitą per kelias biržas, siekiant išvengti didelio kainų svyravimo vienoje biržoje;
     \item konvertuoti vieną turto vienetą į kelias skirtingas valiutas vienoje tranzakcijoje dėl tam tikrų platformų galimybių;
-    \item pasiskolinti kapitalą iš biržos su sąlyga, kad skola bus grąžinta per arbitražo procesą, taip panaikinant reikalavimą turėti pradinį kapitalą.
+    \item pasiskolinti kapitalą iš biržos su sąlyga, kad skola bus grąžinta per arbitražo procesą, taip panaikinant reikalavimą turėti pradinį kapitalą \cite{flashloan, flashswap}.
 \end{itemize}
 
 Efektyviausia arbitražo ypatumus pateikti pasinaudojant grafais. Pavyzdžiui, grafe, kur mazgai reprezentuoja savininkų sąskaitas (tradicinių valiutų atveju) arba piniginės adresus (kriptovaliutų atveju), o kryptinės briaunos – valiutų ar kriptovaliutų persiuntimus tarp jų, aiškiai matoma turtų judėjimo dinamika ir galimos arbitražo pelno galimybės. 
@@ -212,10 +209,9 @@ Tranzakciją galima suskirstyti į dvi dalis su pavedimais 0-5 ir 6-11. Pirmuosi
 \section{Likvidacijos}
 
 Šiame skyriuje detaliai nagrinėjamas likvidavimo mechanizmas decentralizuotuose skolinimo protokoluose. Likvidacijos procesas yra esminė perviršinio užstato skolinimo platformų dalis, užtikrinanti jų stabilumą ir saugumą. Jo supratimas yra būtinas norint įvertinti, kaip automatizuoti algoritmai gali efektyviai išnaudoti šį mechanizmą pelno generavimui. Ši tema svarbi ne tik dėl praktinio aktualumo likvidatoriams, bet ir todėl, kad tai išskiria DeFi sistemų veikimą nuo tradicinių finansinių platformų. Skiriant daugiau dėmesio šiam procesui, galima tiksliau suformuluoti optimizavimo tikslus bei pagrįsti siūlomų strategijų svarbą.
-% Koks yra sios analizes tikslas? Suprasti apie defi paskolu platformas ir kuo ju likvidavimo procesas issiskiria nuo tradiciniu finansu sistemu.
 
 \subsection{Tradicinės paskolų platformos}
-Paskolų platformos – tai sistemos, kuriose vartotojai gali skolintis ar skolinti pinigus kitiems vartotojams. Tradicinėse bankinėse sistemose bankas veikia kaip tarpininkas tarp skolintojo ir skolininko. Panašiai veikia ir kredito unijos, kuriose nariai vieni kitiems suteikia paskolas per bendrą fondą.
+Paskolų platformos – tai sistemos, kuriose vartotojai gali skolintis ar skolinti pinigus kitiems vartotojams. Tradicinėse bankinėse sistemose bankas veikia kaip tarpininkas tarp skolintojo ir skolininko. Panašiai veikia ir kredito unijos, kuriose nariai vieni kitiems suteikia paskolas per bendrą fondą. \cite{bankandcreditunioin}
 
 \subsubsection{Veiklos principas}
 \begin{itemize}
@@ -226,7 +222,7 @@ Paskolų platformos – tai sistemos, kuriose vartotojai gali skolintis ar skoli
 Skolintojai įneša savo lėšas į platformą, o skolininkai pateikia prašymus dėl paskolų. Platforma tada suderina šiuos du suinteresuotus šalių poreikius. Priklausomai nuo platformos ir paskolos tipo, gali būti reikalaujama, kad skolininkai užstatytų tam tikrą turto dalį kaip garantiją.
 
 \subsubsection{Likvidacijos tradicinėse sistemose}
-Tradicinėse finansų sistemose likvidacija vyksta tuomet, kai skolininkas nesugeba įvykdyti savo įsipareigojimų grąžinti paskolą. Tokiu atveju kredito įstaiga (bankas ar kredito unija) gali pradėti priverstinį skolų išieškojimo procesą, kuris dažnai apima užstato realizavimą.
+Tradicinėse finansų sistemose likvidacija vyksta tuomet, kai skolininkas nesugeba įvykdyti savo įsipareigojimų grąžinti paskolą. Tokiu atveju kredito įstaiga (bankas ar kredito unija) gali pradėti priverstinį skolų išieškojimo procesą, kuris dažnai apima užstato realizavimą. \cite{traditionalliquidation}
 
 Procesas dažnai prasideda nuo skolininko įspėjimo apie neįvykdytą mokėjimą. Jeigu situacija nesikeičia, kreditorius gali inicijuoti teisinį procesą: kreiptis į antstolius arba teismą dėl turto arešto ir pardavimo. Užstatas, pavyzdžiui, nekilnojamasis turtas ar transporto priemonė, įvertinamas ir parduodamas aukcione arba per kitus kanalus.
 
