@@ -74,8 +74,6 @@ The study reveals that historical liquidators often fail to achieve the maximum 
 
 \noindent\textbf{Keywords:} blockchain, defi, liquidation, arbitrage, lending protocols.
 
-% mev
-
 \sectionnonum{Santrumpos}
 \begin{tabular}{rcp{.7\textwidth}}
     {DeFi} & {} & {decentralizuotų finansų sistema, kurioje tradicinės finansinės paslaugos (paskolos, skolinimas, keitimas, draudimas ir kt.) teikiamos naudojant išmaniuosius kontraktus blokų grandinėse} \\ 
@@ -87,23 +85,6 @@ The study reveals that historical liquidators often fail to achieve the maximum 
 % Šios temos aktualumą lemia augantis susidomėjimas decentralizuotomis finansų sistemomis (DeFi), kuriose veikiantys likvidavimo mechanizmai atveria naujas pelno gavimo galimybes. Viena iš pagrindinių tokio pelno formų – arbitražas, kai likvidatorius siekia pasinaudoti sistemos teikiamomis paskatomis grąžinti skolas mainais į vertingesnį užstatą.
 
 \sectionnonum{Įvadas}
-% \begin{enumerate}
-%     \item apibrėžiamas tiriamasis objektas akcentuojant neapibrėžtumą, kuris bus išspręstas darbe,
-%     \item aprašomas temos aktualumas,
-%     \item nurodomas darbo tikslas ir uždaviniai, kuriais bus įgyvendinamas tikslas.
-%     \item aptariamos teorinės darbo prielaidos bei kokios metodikos ir kuriam tikslui naudojamos,
-%     \item apibūdinami su tema susiję literatūros ar kitokie šaltiniai,
-%     \item temos analizės tvarka, darbo atlikimo aplinkybės,
-%     \item pateikiama žinių apie naudojamus instrumentus (programas ir kt., jei darbe yra eksperimentinė dalis). Darbo įvadas neturi būti dėstymo santrauka. 
-% \end{enumerate}
-
-% Darbo uždavinyje\\
-% apibrėžiamas siekiamas rezultatas, kad būtų galimybė išmatuoti, ar tikslai ir
-% uždaviniai yra išspręsti, bei kokiu lygiu (vertinant kiekybę bei kokybę). Pavyzdžiui, „Atlikti literatūros
-% .... analizę“ nėra tinkamas uždavinys, nes nusako procesą, tačiau neapibrėžia jo rezultato. Tinkamos
-% uždavinio formuluotės šablonai: „Išanalizuoti literatūrą … siekiant apžvelgti ir įvertinti /… metodų
-% tinkamumą sprendžiamam uždaviniui/privalumus ir trūkumus sprendžiant … uždavinį/rekomenduojamas ... projektavimo gaires, šablonus ir pan.“
-
 \subsection*{Tyrimo objektas ir aktualumas}
 Kriptovaliutos – tai sparčiai auganti finansų technologijų sritis, kuri itin traukia spekuliantus, siekiančius pasipelnyti iš šių valiutų vertės svyravimų. Nepaisant didelių pelningumo galimybių, investavimas į kriptovaliutas neatsiejamas nuo rizikos, kad valiutos vertė gali smarkiai nukristi, dėl ko investuotojas gali prarasti dalį ar net visą pradinę investiciją. Siekiant sumažinti riziką ir pasiekti maksimalią grąžą, dažnai taikomi automatiniai arbitražo algoritmai. Šie algoritmai stebi kainų pokyčius skirtingose biržose ir automatiškai vykdo sandorius, siekdami išnaudoti net ir menkiausius kainų skirtumus.
 
@@ -154,9 +135,12 @@ Darbas baigiamas kiekybine strategijų palyginimo analize ir rekomendacijomis li
 
 Visiškai naujai įtraukti skyriai:
 \begin{itemize}
-\item \ref{sec:panasumai_su_kitais_protokolais},
-\item \ref{sec:pilnas_iseikvojimas_vienodoms_valiutoms} - \ref{sec:strategiju_apibendrinimas},
-\item \ref{sec:pilnas_iseikvojimas_vienodoms_valiutoms_tyrimas}.
+\item \ref{sec:panasumai_su_kitais_protokolais} \nameref{sec:panasumai_su_kitais_protokolais},
+\item \ref{sec:pilnas_iseikvojimas_vienodoms_valiutoms} \nameref{sec:pilnas_iseikvojimas_vienodoms_valiutoms}
+\item \ref{sec:from_largest_cf} \nameref{sec:from_largest_cf}
+\item \ref{sec:nuo_maziausio_ustato_koeficiento} \nameref{sec:nuo_maziausio_ustato_koeficiento}
+\item \ref{sec:strategiju_apibendrinimas} \nameref{sec:strategiju_apibendrinimas},
+\item \ref{sec:pilnas_iseikvojimas_vienodoms_valiutoms_tyrimas} \nameref{sec:pilnas_iseikvojimas_vienodoms_valiutoms_tyrimas}.
 \end{itemize}
 
 Skyriuje \ref{sec:strategiju_apibendrinimas} įtrauktas bendras reikalavimas, kad visų strategijų logikoje būtų numatyta sąlyga: kiekvienas likvidacijos kvietimas turi generuoti didesnę vertę nei jo įvykdymo kuro sąnaudos. Dėl šio reikalavimo strategijos, tokios kaip \textit{iki uždarymo ribos}, tam tikrais atvejais visai nevykdo likvidacijos – priešingai nei kursiniame darbe, kuriame analogiškos situacijos buvo vykdomos nuostolingai. Šie nuostoliai buvo matomi bendroje pelno kaupimo kreivėje kursinio darbo rezultatuose, tačiau šiame darbe jie eliminuoti.
@@ -578,6 +562,7 @@ Taigi grįžtant į pradžią – strategija prasideda nuo visų skolininko užs
 Turint užstato valiutą su didžiausia verte, iškyla neaiškumas – ar ją verta naudoti ankstesniuose žingsniuose dėl jos aukšto užstato koeficiento, kuris leidžia ilgiau išlaikyti skolininką likviduojamą, ar geriau pasilikti šią valiutą paskutinei likvidacijai, kai siekiama maksimalaus grąžinamos paskolos kiekio pagal „didžiausios skolos“ strategiją. Šio pasirinkimo optimizavimas priklauso nuo konkrečių pozicijos parametrų ir yra paliekamas kitiems tyrimams.
 
 \subsection{Nuo mažiausio užstato koeficiento}
+\label{sec:nuo_maziausio_ustato_koeficiento}
 
 Ši strategija yra analogiška \textit{nuo didžiausio užstato koeficiento} strategijai, tačiau skirtumas slypi tvarkoje: užstato valiutos pradiniame sąraše rikiuojamos didėjančia tvarka pagal užstato koeficientą. Jei kelių valiutų koeficientai sutampa, jos toliau rikiuojamos pagal užstato vertę didėjančia tvarka.
 
@@ -781,7 +766,7 @@ ETH  &  0         &  90,82M   & 80\%  \\ \hline
   \label{liquidation_example_comp}
   \end{table}
 
-\subsection{Pilnas išeikvojimas vienodoms valiutoms}
+\subsection{Pilno išeikvojimo vienodoms valiutoms strategijos pranašumas prieš didžiausia skola}
 \label{sec:pilnas_iseikvojimas_vienodoms_valiutoms_tyrimas}
 
 Parodome, kad \textit{pilno išeikvojimo} strategija gali būti efektyvesnė nei primityvioji \textit{didžiausios skolos} strategija, kartu eliminuojant valiutos likvidumo klausimą. Šiame skyriuje analizuojame tik tuos atvejus, kai skolos grąžinimo ir užstato valiutos sutampa, todėl pelnas taip pat išreiškiamas ta pačia valiuta. Tokį apribojimą motyvuoja tai, kad sudėtingesnė \textit{pilnas išeikvojimo} strategija leidžia grąžinti didesnę skolos dalį ir atgauti didesnę užstato sumą, kas dažnai reikalauja didelius valiutų keitimo kitose rinkose. Tačiau didesni keitimo kiekiai lemia didesnį kainos pokytį nepalankia kryptimi. Taigi, nors iš vienos pusės optimizuojamas likvidacijos dydis, kartu patiriamas ir didesnis kainos nuokrypis, galintis sumažinti arba visiškai panaikinti pelno augimą. Todėl šio skyriaus analizėje koncentruojamės į scenarijus, kuriuose valiutų keitimas nėra būtinas. Išimtį sudaro atvejai, kai likvidatoriui pelnas pageidaujamas konkrečia valiuta – tuomet atliekami valiutų keitimai, tačiau jų apimtis gerokai mažesnė, nes keičiamas tik pelnas, t. y. apie 10\% grąžintos skolos dydžio.
