@@ -67,22 +67,25 @@ Darbe nagrinėjamas perviršinio užstato skolinimo protokolų likvidavimo proce
 
 \textcolor{red}{Toliau tyrimo išvados.}
 
-
 \noindent\textbf{Raktiniai žodžiai:} blokų graindinės, decentralizuoti finansai, likvidacija, arbitražas, maksimaliai išgaunama vertė, skolinimo protokolai.
 
 \sectionnonum{Summary}
 \textcolor{red}{Išversti}
 % The study examines ways to optimize liquidation processes in over-collateralized lending protocols. The research focuses on analyzing liquidation strategies and propose algorithmic modifications to maximize the liquidator’s profit. A review of the existing methods includes a detailed analysis of the “Optimal Fixed Spread Liquidation Strategy” algorithm. A proposed modification, called "the drain" strategy, optimizes the process, enabling full utilization of the liquidation opportunity without losing its potential profit. Empirical evidence from the Venus protocol shows that most liquidations do not achieve the maximum possible profit. A comparison of three strategies (“repeat,” “up to close factor,” and “drain”) shows that "the drain" strategy generate up to 72\% more profit than historical liquidations. This demonstrates that when optimized strategies can significantly increase liquidators’ profitability. The findings of this study contribute to the ecosystem of lending protocol optimization and pave the way for further analyses related to currency pair and collateral management strategies. Future research could explore using different currencies and other liquidation opportunities to enhance the efficiency of arbitrage algorithms.\\
 
-\textbf{Keywords:} blockchain, defi, liquidation, arbitrage, mev, lending protocols.
+\textbf{Keywords:} blockchain, defi, liquidation, arbitrage, lending protocols.
+
+% mev
 
 \sectionnonum{Santrumpos}
 \begin{tabular}{rcp{.7\textwidth}}
     {DeFi} & {} & {decentralizuotų finansų sistema, kurioje tradicinės finansinės paslaugos (paskolos, skolinimas, keitimas, draudimas ir kt.) teikiamos naudojant išmaniuosius kontraktus blokų grandinėse} \\ 
-    {MEV} & {} & {angl. \textit{Maximal Extractable Value} – maksimaliai išgaunama vertė; tai pelnas, kurį gali gauti blokų grandinės tvarką valdantis dalyvis (pvz., validatorius ar likvidatorius) per tranzakcijų tvarkos manipuliavimą bloke, įskaitant jų įterpimą, atidėjimą ar pašalinimą} \\ 
+    % {MEV} & {} & {angl. \textit{Maximal Extractable Value} – maksimaliai išgaunama vertė; tai pelnas, kurį gali gauti blokų grandinės tvarką valdantis dalyvis (pvz., validatorius ar likvidatorius) per tranzakcijų tvarkos manipuliavimą bloke, įskaitant jų įterpimą, atidėjimą ar pašalinimą} \\ 
     % https://tatum.io/blog/what-is-mev-in-crypto#:~:text=Maximal%20extractable%20value%2C%20popularly%20known,in%20a%20decentralized%20blockchain%20ecosystem.
     {BSC} & {} & {\textit{Binance Smart Chain} blokų grandinė}
 \end{tabular}
+
+% Šios temos aktualumą lemia augantis susidomėjimas decentralizuotomis finansų sistemomis (DeFi), kuriose veikiantys likvidavimo mechanizmai atveria naujas pelno gavimo galimybes. Viena iš pagrindinių tokio pelno formų – arbitražas, kai likvidatorius siekia pasinaudoti sistemos teikiamomis paskatomis grąžinti skolas mainais į vertingesnį užstatą.
 
 \sectionnonum{Įvadas}
 % \begin{enumerate}
@@ -105,13 +108,13 @@ Darbe nagrinėjamas perviršinio užstato skolinimo protokolų likvidavimo proce
 \subsection*{Tyrimo objektas ir aktualumas}
 Kriptovaliutos – tai sparčiai auganti finansų technologijų sritis, kuri itin traukia spekuliantus, siekiančius pasipelnyti iš šių valiutų vertės svyravimų. Nepaisant didelių pelningumo galimybių, investavimas į kriptovaliutas neatsiejamas nuo rizikos, kad valiutos vertė gali smarkiai nukristi, dėl ko investuotojas gali prarasti dalį ar net visą pradinę investiciją. Siekiant sumažinti riziką ir pasiekti maksimalią grąžą, dažnai taikomi automatiniai arbitražo algoritmai. Šie algoritmai stebi kainų pokyčius skirtingose biržose ir automatiškai vykdo sandorius, siekdami išnaudoti net ir menkiausius kainų skirtumus.
 
-Viena iš specifinių arbitražo formų – likvidacijos galimybių išnaudojimas decentralizuotose skolinimo platformose. Plečiantis kriptovaliutų ekosistemai, vis daugiau naudotojų renkasi decentralizuotus paskolų protokolus, leidžiančius skolintis kriptoturtą užstatant kitą kriptoturtą. Siekiant užtikrinti sistemos stabilumą ir išvengti skolų negrąžinimo, šiuose protokoluose įgyvendinamas perviršinio užstato modelis: skolininkai privalo užstatyti daugiau turto nei skolinasi, o trečiosioms šalims suteikiama teisė automatiškai padengti skolininko įsiskolinimą mainais į užstatą su nuolaida, taip gaunant ekonominę paskatą.
+Viena iš specifinių arbitražo formų – likvidacijos galimybių išnaudojimas decentralizuotose skolinimo platformose, kai skolininko pozicija tampa likviduojama. Plečiantis kriptovaliutų ekosistemai, vis daugiau naudotojų renkasi decentralizuotus paskolų protokolus, leidžiančius skolintis kriptoturtą užstatant kitą kriptoturtą. Siekiant užtikrinti sistemos stabilumą ir išvengti skolų negrąžinimo, šiuose protokoluose įgyvendinamas perviršinio užstato modelis: skolininkai privalo užstatyti daugiau turto nei skolinasi, o trečiosioms šalims suteikiama teisė automatiškai padengti skolininko įsiskolinimą mainais į užstatą su nuolaida, taip gaunant ekonominę paskatą.
 
-Šiame darbe tiriamas decentralizuotų skolinimo protokolų likvidavimo mechanizmas, ypatingą dėmesį skiriant \textit{Venus} protokolui, veikiančiam \textit{Binance Smart Chain} tinkle. Tyrime nagrinėjama, kaip galima padidinti likvidatoriaus pelną optimizuojant likvidavimo procesą. Kadangi \textit{Venus} veikimo principai yra artimi kitiems decentralizuotiems skolinimo protokolams, darbo rezultatai gali būti taikomi ir platesniame DeFi kontekste.
+Nors pats likvidavimo principas yra funkcionaliai įgyvendintas daugelyje protokolų, šis procesas dar nėra iki galo ištirtas ir optimizuotas. Dabartiniai metodai dažnai nepanaudoja viso likviduojamos pozicijos potencialo, todėl egzistuoja galimybės ištraukti papildomą vertę. Tai rodo, kad likvidavimo mechanizmas išlieka atviras tolesniam tyrimui ir tobulinimui.
 
 Maksimaliam likvidacijos efektyvumui pasiekti būtinas tikslingas šio proceso modeliavimas ir optimizavimas. Todėl ši tema aktuali ne tik individualiems likvidatoriams, siekiantiems padidinti pelningumą, bet ir protokolų kūrėjams, norintiems užtikrinti skaidrų ir efektyvų sistemų veikimą.
 
-% Šios temos aktualumą lemia augantis susidomėjimas decentralizuotomis finansų sistemomis (DeFi), kuriose veikiantys likvidavimo mechanizmai atveria naujas pelno gavimo galimybes. Viena iš pagrindinių tokio pelno formų – arbitražas, kai likvidatorius siekia pasinaudoti sistemos teikiamomis paskatomis grąžinti skolas mainais į vertingesnį užstatą.
+Šiame darbe tiriamas decentralizuotų skolinimo protokolų likvidavimo mechanizmas, ypatingą dėmesį skiriant \textit{Venus} protokolui, veikiančiam \textit{Binance Smart Chain} tinkle. Tyrime nagrinėjama, kaip galima padidinti likvidatoriaus pelną optimizuojant likvidavimo procesą. Kadangi \textit{Venus} veikimo principai yra artimi kitiems decentralizuotiems skolinimo protokolams, darbo rezultatai gali būti taikomi ir platesniame DeFi kontekste.
 
 \subsection*{Darbo tikslas ir uždaviniai}
 Darbo tikslas – sukurti ir optimizuoti likvidavimo algoritmą, kuris maksimaliai padidintų likvidatoriaus pelną.
@@ -122,27 +125,44 @@ Norint įgyvendinti darbo tikslą, išsikelti šie uždaviniai:
     \item Išsamiai išnagrinėti \textit{Venus} protokolo likvidavimo mechanizmą.
     \item Sukurti ir/arba modifikuoti efektyvesnį likvidavimo algoritmą.
     \item Palyginti sukurtas strategijas tarpusavyje bei su istorinėmis likvidacijomis.
-    \item Suformuluoti rekomendacijas likvidatoriams, siekiant pagerinti likvidacijos efektyvumą ir pelningumą.
+    \item Suformuluoti rekomendacijas likvidatoriams, siekiant pagerinti likvidacijos pelningumą.
 \end{enumerate}
 
-\subsection*{Metodai}
-Empirinei analizei naudotas \textit{Venus} protokolo kodas bei istoriniai duomenys iš BSC tinklo. Strategijų simuliacija įgyvendinta naudojant \textit{Forge} testavimo sistemą. Analizei naudoti duomenys surinkti naudojant \textit{quicknode.com} archyvinę prieigą prie BSC blokų grandinės.
-
-Naudojamas supaprastintas pelno skaičiavimo modelis, kuris remiasi tuo metu galiojančiomis orakulo kainomis ir faktinėmis strategijos kuro sąnaudomis, tačiau nenumato privalomo pelno konvertavimo į pradinę valiutą. Tai leidžia išvengti papildomų arbitražo veiksmų analizės ir koncentruotis tik į pačios likvidacijos pelningumą.
-
 \subsection*{Literatūra}
-\textcolor{red}{
-Išsiaiškinti kas tiksliau čia turi būti aprašyta.
-}
+Literatūros apžvalgoje remiamasi kelių tipų šaltiniais:
+\begin{itemize}
+\item Oficialia decentralizuotų skolinimo protokolų technine dokumentacija, kurioje aprašomi jų veikimo principai, rizikos valdymo mechanizmai ir likvidavimo taisyklės.
+\item Moksliniais straipsniais ir tyrimais, nagrinėjančiais perviršinio užstato modelį, likvidacijos efektyvumą.
+\item DeFi ir blokų grandinės analizei skirtais tinklaraščiais bei platformomis, kuriose pateikiami istoriniai duomenys, rinkų dinamika ir protokolų klasifikacijos.
+\item Atviruoju kodu pateikiamais protokolų išmaniųjų kontraktų aprašymais.
+\end{itemize}
 
-Literatūros apžvalgoje remiamasi tiek technine dokumentacija, tiek moksliniais darbais apie likvidavimo mechanizmus ir decentralizuotas finansų sistemas.
-% Taip pat naudojami oficialūs protokolų dokumentai (pvz., Venus ar Aave techninė dokumentacija) ir istoriniai duomenų šaltiniai, leidžiantys atkurti realias likvidacijas.
+Šie šaltiniai leido suformuoti visapusišką vaizdą apie esamus metodus, jų apribojimus ir atvėrė kelią siūlyti naujus optimizavimo algoritmus.
 
-\subsection*{Temos analizės tvarka, darbo atlikimo aplinkybės}
-\textcolor{red}{
-???
-}
-% Darbo pradžioje pateikiamas arbitražo sąvokos paaiškinimas, kad būtų suprasta likvidacijos ekonominė motyvacija. Vėliau aptariamas pats likvidavimo mechanizmas, jo ypatybės DeFi kontekste. Toliau pateikiamos ir formalizuojamos kelios likvidacijos strategijos, kurios vėliau empiriškai palyginamos naudojant realių istorinių likvidacijų duomenis. Galiausiai pateikiami rezultatai ir įžvalgos apie skirtingų strategijų efektyvumą.
+\subsection*{Tyrimo eiga ir metodai}
+Darbo pradžioje išnagrinėjama arbitražo sąvoka ir aptariami pagrindiniai decentralizuotų paskolų protokolų principai. Vėliau detaliai analizuojamas \textit{Venus} protokolo likvidavimo mechanizmas, išskiriant jo struktūrinius ir veikimo ypatumus bei lyginant su kitais protokolais.
+
+Remiantis išanalizuota literatūra apie decentralizuotų skolinimo protokolų likvidacijos veikimo principus, šiame darbe siūlomos strategijos, išnaudojančios specifinius mechanizmų bruožus ir siekiančios optimizuoti likvidacijos procesą. Tolesniuose skyriuose formalizuojamos įvairios likvidacijos strategijos – nuo paprastų euristikų iki pažangių algoritmų, pritaikytų \textit{Venus} protokolo struktūrai. Strategijų veiksmingumas vertinamas pasitelkiant realias istorines likvidacijas ir simuliacijų aplinką.
+
+Empirinei analizei pasitelktas \textit{Venus} protokolo kodas, parašytas \textit{Solidity} kalba, bei istoriniai duomenys iš \textit{Binance Smart Chain} tinklo. Eksperimentinei daliai naudota \textit{Forge} testavimo aplinka, leidžianti simuliuoti likvidacijas konkrečiuose blokų grandinės momentuose. Duomenys surinkti naudojant \textit{quicknode.com} teikiamą archyvinę prieigą prie BSC blokų grandinės.
+
+Naudojamas supaprastintas pelno skaičiavimo modelis, kuris remiasi tuo metu galiojančiomis orakulo kainomis ir faktinėmis strategijos kuro sąnaudomis, tačiau neapima valiutų konvertavimo operacijų už likvidacijos ribų, nors tokie keitimai praktikoje dažnai pasitaiko vykdant arbitražą. Šis supaprastinimas leidžia eliminuoti arbitražo proceso kompleksumą ir susitelkti tik į pačios likvidacijos pelningumo analizę.
+
+Darbas baigiamas kiekybine strategijų palyginimo analize ir rekomendacijomis likvidatoriams.
+
+\subsection*{Papildomas indėlis nuo kursinio darbo}
+Šiame baigiamajame darbe toliau plėtojamas kursinio darbo metu pradėtas tyrimas ta pačia tema. Dėstymo skyriai buvo papildyti atnaujinta informacija ir redaguoti, siekiant pagerinti teksto aiškumą. Darbe pristatomos naujos strategijos, kurios kursiniame darbe dar nebuvo nagrinėtos: \textit{didžiausia skola}, \textit{pilnas išeikvojimas vienodoms valiutoms}, \textit{nuo didžiausio užstato koeficiento} ir \textit{nuo mažiausio užstato koeficiento}. Šios strategijos papildo kursinį darbą, praplėsdamos tyrimą eksperimentais su skirtingomis skolos ir užstato valiutų poromis.
+
+Visiškai naujai įtraukti skyriai:
+\begin{itemize}
+\item \ref{sec:panasumai_su_kitais_protokolais},
+\item \ref{sec:pilnas_iseikvojimas_vienodoms_valiutoms} - \ref{sec:strategiju_apibendrinimas},
+\item \ref{sec:pilnas_iseikvojimas_vienodoms_valiutoms_tyrimas}.
+\end{itemize}
+
+Skyriuje \ref{sec:pelningumo_skaiciavimas} išplėsta pelningumo skaičiavimo formulė, kad būtų įvertinti kelių valiutų grąžinimai bei užstato atsiėmimai.
+
+Skyriuose \ref{sec:istoriniu_likvidaciju_analizes_pavyzdys} ir \ref{sec:lyginimas_daug} papildomai įtraukta naujų strategijų analizė bei pateiktos skolininkų pradinių pozicijų būsenos.
 
 \section{Kas yra arbitražas}
 % TODO
@@ -374,6 +394,7 @@ Likvidatoriams yra naudinga grąžinti kuo didesnę skolą už skolininką, nes 
 Jeigu likvidatorius siekia vykdyti arbitražą, jis taip pat turi įvertinti kainos pokytį, kuris įvyks keičiant valiutas kitose rinkose. Dideli valiutų keitimai lemia didesnius kainos svyravimus nepalankia kryptimi. Todėl likvidatoriaus veiksmus netiesiogiai riboja ir kitų rinkų likvidumas. Jei valiutos likvidumas yra mažas, orakulo nurodyta kaina gali reikšmingai skirtis nuo realios rinkos kainos. Tokiais atvejais gali susidaryti situacija, kai net ir turėdamas galimybę atlikti didelės vertės (milijonų dolerių) likvidaciją, likvidatorius jos nevykdys, nes užstatas būtų realizuojamas gerokai žemesne kaina nei ta, kurią tuo metu rodo orakulas. 
 
 \subsection{Panašumai su kitais protokolais}
+\label{sec:panasumai_su_kitais_protokolais}
 
 Nors šiame darbe pagrindinis dėmesys skiriamas \textit{Venus} protokolo likvidavimo mechanizmo analizei, būtina pažymėti, kad šis mechanizmas yra itin panašus į kitų reikšmingų decentralizuotų skolinimo protokolų, tokių kaip \textit{Aave} ir \textit{Compound}, veikimą. Dėl šios priežasties \textit{Venus} galima laikyti reprezentatyviu DeFi skolinimo sistemų atveju, o šiame darbe siūlomos strategijos gali būti aktualios ir taikomos kitų protokolų kontekste.
 
@@ -480,6 +501,7 @@ Galima įsivaizduoti, kad \ref{sec:esami_tyrimai} skyriuje aprašytas algoritmas
 Tais atvejais, kai skolininkas yra stipriai įsiskolinęs, siūlomas algoritmas atliks seką likvidacijų, kurių kiekviena bus dvigubai mažesnė už ankstesnę. Tai tęsis tol, kol bus grąžinta visa skola arba išnaudotas visas užstatas. Dėl šios savybės šią modifikuotą strategiją vadiname \textit{pilno išeikvojimo} strategija (angl. \textit{drain strategy}).
 
 \subsection{Pilnas išeikvojimas vienodoms valiutoms}
+\label{sec:pilnas_iseikvojimas_vienodoms_valiutoms}
 
 Ši strategija yra \textit{pilno išeikvojimo} strategijos specializacija, taikoma tik tiems atvejams, kai skolos ir užstato valiutos sutampa. Tokiose situacijose atliekamos pilnos išeikvojimo likvidacijos visoms valiutų poroms, kur skolos ir užstato valiuta yra identiška. Prioritetas teikiamas toms valiutoms, kurių reikšmė $\min(\text{skolos vertė}, \text{užstato vertė} / \text{likvidacijos paskata})$ yra didžiausia, ir einama žemyn, kol skolininkas nebėra likviduojamas. Šios strategijos privalumai – sumažinta valiutų konvertavimo rizika, išvengiama papildomų mokesčių, susijusių su keitimu, bei sumažinama likvidumo trūkumo tikimybė kitose rinkose, nes visa likvidacija vyksta vienoje valiutų poroje. Pelnas tokiu atveju taip pat išmokamas ta pačia valiuta.
 
@@ -565,6 +587,8 @@ Turint užstato valiutą su didžiausia verte, iškyla neaiškumas – ar ją ve
 Šios strategijos tikslas – išsiaiškinti, ar užstato valiutų tvarka turi reikšmingos įtakos likvidatoriaus galutiniam pelnui. Ji įtraukta tyrimo tikslais kaip kontrolinė versija, leidžianti palyginti rezultatų skirtumus su strategija, kurioje tvarka yra priešinga.
 
 \subsection{Strategijų apibendrinimas}
+\label{sec:strategiju_apibendrinimas}
+
 Visoms šiame darbe nagrinėjamoms strategijoms taikomas tas pats bendras apribojimas – likvidacija nėra vykdoma, jei jos pelnas yra mažesnis nei kuro sąnaudos, reikalingos likvidacijos kvietimui. Tokiu būdu užtikrinama, kad kiekvienas likvidacijos bandymas būtų ekonomiškai pagrįstas ir neturėtų neigiamo pelno.
 
 Svarbu priminti, kad kalbant apie skolininko užstato vertę, šiame darbe visur daroma prielaida, jog turima omenyje tik tą užstato dalį, kuri tuo metu gali būti išsigryninta, o ne apgaubtoje formoje. Toks supaprastinimas leidžia išvengti situacijų, kai skola niekada negrąžinama, o užstato konvertavimas tampa neįmanomas dėl protokolo likvidumo stokos. Be to, toks apribojimas yra ypač svarbus vykdant arbitražą – siekiant pasinaudoti pelno galimybe, būtina kuo greičiau išsigryninti gautą užstatą ir, jei reikia, atlikti papildomus valiutų keitimus tam, kad būtų grįžta prie arbitražo vykdytojo pelno valiutos.
@@ -601,6 +625,7 @@ Tikslas – palyginti \ref{sec:liq_strategijos} skyriuje aprašytas likvidavimo 
 Atkartosime istorines \textit{Venus} protokolo \textit{Core} baseino likvidacijas ir joms priskirsime \textit{atkartoti} strategiją. Tai leidžia įvertinti faktinį tuo metu naudotą sprendimą ir palyginti jį su kitomis strategijomis. Strategijose, kuriose būtina nurodyti fiksuotą skolos ar užstato valiutą, bus naudojamos tos pačios valiutos, kokios buvo istorinėje likvidacijoje – taip užtikrinamos identiškos pradinės sąlygos. Taip pat kiekvienai simuliacijai bus taikoma ta pati kuro kaina, kurią savo tranzakcijoje nustatė originalus likvidacijos vykdytojas. Tokiu būdu strategiškai atkuriamos realios tuo metu galiojusios sąlygos, leidžiančios sąžiningai palyginti skirtingų strategijų rezultatus.
 
 \subsection{Pelningumo skaičiavimas}
+\label{sec:pelningumo_skaiciavimas}
 
 Darbe nagrinėjamos strategijos bus lyginamos pagal jų generuojamą pelną – kiekvienai strategijai apskaičiuosime grynąją naudą, atsižvelgiant į orakulo kainas bei kuro sąnaudas. Toliau pateikiamas pelningumo apibrėžimas ir formulė, kuria remsimės analizuodami skirtingų strategijų efektyvumą.
 
@@ -648,6 +673,7 @@ Pačios strategijos buvo rašomos \textit{Solidity} programavimo kalba. Dėmesys
 Grąžinamos sumos dydžiui nustatyti parašytos funkcijos, kurios iš blokų grandinės paima duomenis apie skolininką. Rezultatams patikrinti šios grąžinamos sumos papildomai testuojamos su padidinta verte, kad būtų galima įsitikinti, jog didesnė likvidacijos suma lemia nepageidaujamų situacijų (pvz., nebegalima toliau likviduoti). Nors grąžinamų sumų skaičiavimai ir papildomos simuliacijos naudoja blokų grandinės skaičiavimo kuro vienetus, jie nėra įtraukiami į likvidacijos mokesčius, nes likvidacijos reikšmes galima apskaičiuoti kitoje (ne blokų grandinės)  aplinkoje ir tik tuomet įkelti jas į likvidaciją vykdančias tranzakcijas.
 
 \subsection{Istorinių likvidacijų analizės pavyzdys}
+\label{sec:istoriniu_likvidaciju_analizes_pavyzdys}
 
 \small
 Šiame skyriuje nagrinėsime likvidaciją tranzakcijoje \\\href{https://app.blocksec.com/explorer/tx/bsc/0x8d286fa28b0eb4d4d4e1a8cdaf078190f207921f5d1a5f198de56f5995e2c606}{\texttt{0x8d286fa28b0eb4d4d4e1a8cdaf078190f207921f5d1a5f198de56f5995e2c606}}.
@@ -759,6 +785,8 @@ ETH  &  0         &  90,82M   & 80\%  \\ \hline
   \end{table}
 
 \subsection{Pilnas išeikvojimas vienodoms valiutoms}
+\label{sec:pilnas_iseikvojimas_vienodoms_valiutoms_tyrimas}
+
 Parodome, kad \textit{pilno išeikvojimo} strategija gali būti efektyvesnė nei primityvioji \textit{didžiausios skolos} strategija, kartu eliminuojant valiutos likvidumo klausimą. Šiame skyriuje analizuojame tik tuos atvejus, kai skolos grąžinimo ir užstato valiutos sutampa, todėl pelnas taip pat išreiškiamas ta pačia valiuta. Tokį apribojimą motyvuoja tai, kad sudėtingesnė \textit{pilnas išeikvojimo} strategija leidžia grąžinti didesnę skolos dalį ir atgauti didesnę užstato sumą, kas dažnai reikalauja didelius valiutų keitimo kitose rinkose. Tačiau didesni keitimo kiekiai lemia didesnį kainos pokytį nepalankia kryptimi. Taigi, nors iš vienos pusės optimizuojamas likvidacijos dydis, kartu patiriamas ir didesnis kainos nuokrypis, galintis sumažinti arba visiškai panaikinti pelno augimą. Todėl šio skyriaus analizėje koncentruojamės į scenarijus, kuriuose valiutų keitimas nėra būtinas. Išimtį sudaro atvejai, kai likvidatoriui pelnas pageidaujamas konkrečia valiuta – tuomet atliekami valiutų keitimai, tačiau jų apimtis gerokai mažesnė, nes keičiamas tik pelnas, t. y. apie 10\% grąžintos skolos dydžio.
 
 Arbitražo vykdymo kontekste likviduojama valiuta nebūtinai yra ta, kurią likviduotojas ketina laikyti ilgesnį laiką. Todėl, įvykdęs likvidaciją, likviduotojas gali gautą pelną ta valiuta konvertuoti į stabilesnę, pavyzdžiui, USDC, kuris yra susietas su JAV doleriu. Šis konvertavimą galima atlikti atskiroje tranzakcijoje, kurios kuro mokestis už vienetą yra mažesnis nei pačios likvidacijos metu.
