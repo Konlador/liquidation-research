@@ -130,10 +130,10 @@ Norint įgyvendinti darbo tikslą, išsikelti šie uždaviniai:
 \subsection*{Literatūra}
 Literatūros apžvalgoje remiamasi kelių tipų šaltiniais:
 \begin{itemize}
-\item Oficialia decentralizuotų skolinimo protokolų technine dokumentacija, kurioje aprašomi jų veikimo principai, rizikos valdymo mechanizmai ir likvidavimo taisyklės.
-\item Moksliniais straipsniais ir tyrimais, nagrinėjančiais perviršinio užstato modelį, likvidacijos efektyvumą.
-\item DeFi ir blokų grandinės analizei skirtais tinklaraščiais bei platformomis, kuriose pateikiami istoriniai duomenys, rinkų dinamika ir protokolų klasifikacijos.
-\item Atviruoju kodu pateikiamais protokolų išmaniųjų kontraktų aprašymais.
+\item Oficialia decentralizuotų skolinimo protokolų technine dokumentacija, kurioje aprašomi jų veikimo principai, rizikos valdymo mechanizmai ir likvidavimo taisyklės. \cite{aavelikvidacijos, compound-liquidation, venussavokosbendras}
+\item Atviruoju decentralizuotų skolinimo protokolų išmaniųjų kontraktų kodu. Kai kuriais atvejais likvidavimo procesai nėra išsamiai dokumentuoti, todėl tenka remtis originaliu kontraktų kodu siekiant tiksliai suprasti jų veikimą. \cite{venusprotocolcode, venusmaxcf}
+\item Moksliniais straipsniais ir tyrimais, nagrinėjančiais perviršinio užstato modelį, likvidacijos efektyvumą. \cite{Emp}
+\item DeFi ir blokų grandinės analizei skirtais tinklaraščiais bei platformomis, kuriose pateikiami istoriniai duomenys, rinkų dinamika ir protokolų klasifikacijos. \cite{LikvidacijuProtokolai}
 \end{itemize}
 
 Šie šaltiniai leido suformuoti visapusišką vaizdą apie esamus metodus, jų apribojimus ir atvėrė kelią siūlyti naujus optimizavimo algoritmus.
@@ -150,7 +150,7 @@ Naudojamas supaprastintas pelno skaičiavimo modelis, kuris remiasi tuo metu gal
 Darbas baigiamas kiekybine strategijų palyginimo analize ir rekomendacijomis likvidatoriams.
 
 \subsection*{Darbo plėtra nuo kursinio darbo}
-Šiame baigiamajame darbe toliau plėtojamas kursinio darbo metu pradėtas tyrimas ta pačia tema. Dėstymo skyriai buvo papildyti atnaujinta informacija ir redaguoti, siekiant pagerinti teksto aiškumą. Darbe pristatomos naujos strategijos, kurios kursiniame darbe dar nebuvo nagrinėtos: \textit{didžiausia skola}, \textit{pilnas išeikvojimas vienodoms valiutoms}, \textit{nuo didžiausio užstato koeficiento} ir \textit{nuo mažiausio užstato koeficiento}. Šios strategijos papildo kursinį darbą, praplėsdamos tyrimą eksperimentais su skirtingomis skolos ir užstato valiutų poromis.
+Šiame baigiamajame darbe toliau plėtojamas kursinio darbo metu pradėtas tyrimas ta pačia tema. Kai kurie kursinio darbo skyriai buvo perrašyti, papildant juos naujais duomenimis ir detalesniais paaiškinimais, kad tekstas būtų aiškesnis ir labiau atitiktų baigiamojo darbo reikalavimus. Darbe pristatomos naujos strategijos, kurios kursiniame darbe dar nebuvo nagrinėtos: \textit{didžiausia skola}, \textit{pilnas išeikvojimas vienodoms valiutoms}, \textit{nuo didžiausio užstato koeficiento} ir \textit{nuo mažiausio užstato koeficiento}. Šios strategijos papildo kursinį darbą, praplėsdamos tyrimą eksperimentais su skirtingomis skolos ir užstato valiutų poromis.
 
 Visiškai naujai įtraukti skyriai:
 \begin{itemize}
@@ -158,6 +158,8 @@ Visiškai naujai įtraukti skyriai:
 \item \ref{sec:pilnas_iseikvojimas_vienodoms_valiutoms} - \ref{sec:strategiju_apibendrinimas},
 \item \ref{sec:pilnas_iseikvojimas_vienodoms_valiutoms_tyrimas}.
 \end{itemize}
+
+Skyriuje \ref{sec:strategiju_apibendrinimas} įtrauktas bendras reikalavimas, kad visų strategijų logikoje būtų numatyta sąlyga: kiekvienas likvidacijos kvietimas turi generuoti didesnę vertę nei jo įvykdymo kuro sąnaudos. Dėl šio reikalavimo strategijos, tokios kaip \textit{iki uždarymo ribos}, tam tikrais atvejais visai nevykdo likvidacijos – priešingai nei kursiniame darbe, kuriame analogiškos situacijos buvo vykdomos nuostolingai. Šie nuostoliai buvo matomi bendroje pelno kaupimo kreivėje kursinio darbo rezultatuose, tačiau šiame darbe jie eliminuoti.
 
 Skyriuje \ref{sec:pelningumo_skaiciavimas} išplėsta pelningumo skaičiavimo formulė, kad būtų įvertinti kelių valiutų grąžinimai bei užstato atsiėmimai.
 
@@ -504,7 +506,7 @@ Tais atvejais, kai skolininkas yra stipriai įsiskolinęs, siūlomas algoritmas 
 
 Ši strategija yra \textit{pilno išeikvojimo} strategijos specializacija, taikoma tik tiems atvejams, kai skolos ir užstato valiutos sutampa. Tokiose situacijose atliekamos pilnos išeikvojimo likvidacijos visoms valiutų poroms, kur skolos ir užstato valiuta yra identiška. Prioritetas teikiamas toms valiutoms, kurių reikšmė $\min(\text{skolos vertė}, \text{užstato vertė} / \text{likvidacijos paskata})$ yra didžiausia, ir einama žemyn, kol skolininkas nebėra likviduojamas. Šios strategijos privalumai – sumažinta valiutų konvertavimo rizika, išvengiama papildomų mokesčių, susijusių su keitimu, bei sumažinama likvidumo trūkumo tikimybė kitose rinkose, nes visa likvidacija vyksta vienoje valiutų poroje. Pelnas tokiu atveju taip pat išmokamas ta pačia valiuta.
 
-Norint pritaikyti šią strategiją, būtina, kad skolininko pozicijoje būtų ta pati valiuta tiek skolos, tiek užstato pusėje. Nors tokios pozicijos pasitaiko retai, jos gali atsirasti dėl tam tikrų paskatų struktūrų. \textit{Venus} protokole tiek skolintojai, tiek skolininkai gali gauti papildomas paskatas konkrečiomis valiutomis, jei tai numatyta aktyvioje paskatų programoje \cite{venusrewards}. Pavyzdžiui, jei naudotojas užstato USDT ir kartu pasiskolina USDT, jis gali gauti paskatas abejose pozicijos pusėse. Tarkime, kad užstato metinė grąža yra 5\%, o skolos palūkanos – 9\%. Iš pirmo žvilgsnio tai reikštų 4\% nuostolį, jei pasiskolinta suma investuojama be papildomos grąžos. Tačiau jei paskatos siekia po 6\% tiek už užstatą, tiek už skolą, bendras rezultatas tampa teigiamas: 5\% (užstato palūkanos) + 6\% (užstato paskata) + 6\% (skolos paskata) − 9\% (skolos palūkanos) = +8\% metinė grąža. Tokiu atveju pasiskolinti USDT gali būti pakartotinai užstatomi, taip padidinant pozicijos dydį ir generuojant papildomą grąžą nuo pradinės investicijos. Panašias paskatų sistemas naudoja ir kiti protokolai, tokie kaip \textit{Aave} \cite{aaveincentives}.
+Norint pritaikyti šią strategiją, būtina, kad skolininko pozicijoje būtų ta pati valiuta tiek skolos, tiek užstato pusėje. Nors tokios pozicijos pasitaiko retai, jos gali atsirasti dėl tam tikrų paskatų struktūrų. \textit{Venus} protokole tiek skolintojai, tiek skolininkai gali gauti papildomas paskatas konkrečiomis valiutomis, jei tai numatyta aktyvioje paskatų programoje \cite{venusrewards}. Pavyzdžiui, jei naudotojas užstato USDT ir kartu pasiskolina USDT, jis gali gauti paskatas abejose pozicijos pusėse. Tarkime, kad užstato metinė grąža yra 5\%, o skolos palūkanos – 9\%. Iš pirmo žvilgsnio tai reikštų 4\% nuostolį, jei pasiskolinta suma investuojama be papildomos grąžos. Tačiau jei paskatos siekia po 6\% tiek už užstatą, tiek už skolą, bendras rezultatas tampa teigiamas: 5\% (užstato palūkanos) + 6\% (užstato paskata) + 6\% (skolos paskata) − 9\% (skolos palūkanos) = +8\% metinė grąža. Tokiais atvejais pasiskolinti USDT gali būti nedelsiant užstatomi iš naujo, taip padidinant bendrą pozicijos dydį. Tai leidžia efektyviau pasinaudoti paskatomis. Panašias paskatų sistemas naudoja ir kiti protokolai, tokie kaip \textit{Aave} \cite{aaveincentives}.
 
 \subsection{Nuo didžiausio užstato koeficiento}
 \label{sec:from_largest_cf}
@@ -1225,29 +1227,20 @@ Taip pat, nebuvo analizuojamos likvidacijos, kurios išnaudojo \textit{Venus} pr
 \begin{enumerate}
   \item \textbf{Istoriniai likvidatoriai dažnai neoptimizuoja pelno.} Palyginus atkurtas istorines likvidacijas su kitomis strategijomis, nustatyta, kad daugeliu atvejų buvo praleistos galimybės uždirbti daugiau – tiek dėl per mažos grąžintos paskolos sumos, tiek dėl neefektyvaus valiutų pasirinkimo.
 
-  \item \textbf{\textit{Pilno išeikvojimo} strategija efektyviausia fiksuotose likvidavimo valiutų porose.} Literatūroje aprašytas dviejų etapų likvidavimo metodas buvo išplėstas į ciklinį, leidžiantį efektyviau išnaudoti likvidavimo galimybes. Ši modifikacija padėjo generuoti didesnį pelną nei klasikinė vienos likvidacijos strategija – \textit{iki uždarymo ribos}.
+  \item \textbf{\textit{Pilno išeikvojimo} strategija efektyviausia, kai fiksuota likvidavimo valiutų pora.} Literatūroje aprašytas dviejų etapų likvidavimo metodas buvo išplėstas į ciklinį, leidžiantį efektyviau išnaudoti likvidavimo galimybes. Papildomai pridėtas reikalavimas, kad po kiekvienos likvidacijos būtų galima likviduoti reikšmingą skolos kiekį, padėjo išspręsti su \textit{Venus} susijusią problemą: grąžinant pagrindinę blokų grandinės valiutą, momentiškai pasikeičia kursas, pagal kurį vertinama skolininko pozicija, o tam tikrais atvejais tai turi reikšmingą poveikį. Dėl šių dviejų modifikacijų pavyko sugeneruoti didesnį pelną nei taikant klasikinę vienos likvidacijos strategiją – \textit{iki uždarymo ribos}.
 
-  \item \textbf{Pirmumo tvarka pagal užstato koeficientą daro įtaką rezultatams.} Strategija \textit{nuo didžiausio užstato koeficiento}, prioritizuojanti užstatus su aukštesniu koeficientu, duoda kiek didesnį pelną nei strategija \textit{nuo mažiausio užstato koeficiento}. Visgi, didžiausią įtaką pelnui turi galimybė naudoti kelias užstato valiutas, o ne jų pasirinkimo tvarka.
+  \item \textbf{Užstatų prioritetas pagal koeficientą turi įtakos strategijos rezultatams.} Pasiūlyta strategija \textit{nuo didžiausio užstato koeficiento}, prioritizuojanti užstatus su aukštesniu koeficientu, duoda kiek didesnį pelną nei strategija \textit{nuo mažiausio užstato koeficiento}. Visgi, didžiausią įtaką pelnui turi galimybė naudoti kelias užstato valiutas, o ne jų pasirinkimo tvarka.
 
-  \item \textbf{Strategija \textit{pilnas išeikvojimas vienodoms valiutoms} mažina riziką.} Ši strategija eliminuoja valiutų keitimo riziką ir mokesčius, nes visa operacija vykdoma ta pačia valiuta. Nors ji taikoma ribotai, tyrimas parodė, kad net tokiais atvejais galima uždirbti ženklių sumų – bent \$1{,}4 mln.
+  % \item \textbf{Strategija \textit{pilnas išeikvojimas vienodoms valiutoms} mažina riziką.} Ši strategija eliminuoja valiutų keitimo riziką ir mokesčius, nes visa operacija vykdoma ta pačia valiuta. Nors ji taikoma ribotai, tyrimas parodė, kad net tokiais atvejais galima uždirbti ženklių sumų – bent \$1{,}4 mln.
 
   \item \textbf{Optimali likvidavimo strategija vertina visas skolininko pozicijoje esančias valiutas.} Skolininkų pozicijos gali būti įvairios: nuo vienos skolos ir užstato valiutos iki kelių. Ribojantis tik viena skolos arba užstato valiuta, neretai greitai pasiekiama likvidavimo riba ir nepasinaudojama visu pelno potencialu. Pereinant nuo \textit{pilno išeikvojimo} prie \textit{nuo didžiausio užstato koeficiento}, pradėta naudoti daugiau užstato valiutų, o tai leido padidinti pelną. Strategija \textit{didžiausia skola} turi laisvę pasirinkti tiek skolos, tiek užstato valiutas, todėl ir generuoja didžiausią pelną.
 
   \item \textbf{Modifikuota \textit{nuo didžiausio užstato koeficiento} strategija, kur nurodoma skolos valiuta, turi potencialą tapti pelningiausia.} Pakanka pasirinkti skolos valiutą su didžiausiu įsipareigojimu, ir modifikuota strategija galėtų atkartoti \textit{didžiausios skolos} strategijos pelną, netgi jį viršyti išnaudojant \textit{pilno išeikvojimo} savybę skaidyti likvidacijas į mažesnes dalis bei neapsiribojant viena likvidacija.
 
-  \item \textbf{Esama \textit{nuo didžiausio užstato koeficiento} strategijos versija ne visuomet pelningesnė už \textit{pilno išeikvojimo} strategiją.} Ši strategija nevertina galimybės praleisti mažos vertės užstatus, kurių likvidavimas gali būti neefektyvus, ypač lyginant su toje pačioje pozicijoje esančiais vertingesniais užstatais. Tolimesniuose darbuose siūloma įtraukti galimybę kai kurias valiutas praleisti.
+  \item \textbf{Esama \textit{nuo didžiausio užstato koeficiento} strategijos versija ne visuomet yra pelningesnė už \textit{pilno išeikvojimo} strategiją.} Ši strategija nevertina galimybės praleisti mažos vertės užstatus, kurių likvidavimas gali būti neefektyvus, ypač lyginant su toje pačioje pozicijoje esančiais vertingesniais užstatais. Tolimesniuose darbuose siūloma įtraukti galimybę kai kurias valiutas praleisti net ir tais atvejais, kai pats likvidacijos kvietimas yra pelningas. Visumoje gali būti pelningiau vykdyti likvidacijas su didesnės vertės skolomis ar užstatais, nes bus pasiekta likvidavimo riba su mažesniu kvietimų skaičiumi, o grąžinta suma liks tokia pati.
 
-  \item \textbf{\textit{Nuo didžiausio užstato koeficiento} strategija neapima visų situacijų.} Ji neapibrėžia veiksmų retu atveju, kai didžiausią vertę turintis užstatas riboja likvidavimo procesą, o kiti užstatai yra mažesni ir turi žemesnius koeficientus. Tokiu atveju kyla klausimas – ar verta dabar likviduoti turimą užstatą dėl aukšto koeficiento, ar geriau jo dalį (ar visą) pasilikti paskutiniam kvietimui, kai artėjama prie likvidavimo slenksčio. Šį klausimą verta spręsti tolimesniuose darbuose.
+  \item \textbf{\textit{Nuo didžiausio užstato koeficiento} strategija neapima visų atvejų.} Ji nenurodo veiksmų retais atvejais, kai didžiausią vertę turintis užstatas riboja likvidavimo eigą, o likusieji užstatai yra mažesni ir turi žemesnius koeficientus. Tokiu atveju kyla klausimas – ar verta likviduoti šį užstatą iš karto dėl jo aukšto koeficiento, ar verčiau jo dalį (ar visą) pasilikti paskutinei likvidacijai, kai pozicijos sveikumo koeficientas artėja prie 1. Šio klausimo sprendimas paliekamas tolimesniems tyrimams.
 \end{enumerate}
-  % \item \textbf{Fiksuojant grazinimo ir uzstato valiutas, pelningiausia strategija yra \textit{pilnas išeikvojimas}.} Į fiksuotu valiutu kategorija patenka \textit{atkartoti}, \textit{iki uždarymo ribos} ir \textit{pilnas išeikvojimas}. \textit{Pilno išeikvojimo} strategija lenkia \textit{iki uždarymo ribos} strategija pelningumu +9,8\%.
-
-  % \item \textbf{Efektyviausia strategija – didžiausios skolos.} Tarp visų nagrinėtų metodų didžiausios skolos strategija pasirodė esanti efektyviausia, sugeneravusi 211,6\% daugiau pelno nei istorinis atkartojimo metodas. Tai rodo, kad net ir viena optimizuota likvidacija, parenkant tinkamas valiutas, gali atnešti reikšmingą pelno padidėjimą.
-
-
-  
-
-
-
 
 \printbibliography[title = {Šaltiniai}]
 
